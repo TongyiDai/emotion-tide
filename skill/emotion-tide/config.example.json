@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "timezone": "Asia/Shanghai",
+  "schedule": "17:50",
+  "lark_profile": "YOUR_PERSONAL_LARK_PROFILE",
+  "recipient_user_id": "YOUR_OPEN_ID",
+  "text_processing_mode": "agent_runtime",
+  "text_processing_consent": false,
+  "notify_on_no_evidence": false,
+  "base": {
+    "url": "YOUR_PRIVATE_BASE_URL",
+    "base_token": "YOUR_BASE_TOKEN",
+    "table_id": "YOUR_TABLE_ID",
+    "dashboard_id": "YOUR_DASHBOARD_ID"
+  },
+  "workday_calendar": {
+    "year": null,
+    "source_url": "OFFICIAL_CALENDAR_SOURCE",
+    "source_title": "",
+    "workdays": [],
+    "holidays": []
+  },
+  "crisis_support": {
+    "country": "YOUR_COUNTRY",
+    "emergency": "If there is immediate danger, contact local emergency services and a trusted person nearby."
+  }
+}

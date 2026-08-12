@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="#FFFFFF"/>
+  <text x="72" y="82" font-family="PingFang SC, sans-serif" font-size="34" font-weight="700" fill="#111111">可靠性先从“敢于不知道”开始</text>
+  <text x="72" y="120" font-family="PingFang SC, sans-serif" font-size="18" fill="#666666">证据门同时检查消息量、有效字符、覆盖范围和置信度</text>
+  <rect x="72" y="190" width="1056" height="390" rx="26" fill="#F7F8FA" stroke="#D9DDE5"/>
+  <g font-family="PingFang SC, sans-serif">
+    <text x="150" y="250" font-size="18" fill="#666666">证据输入</text>
+    <circle cx="180" cy="315" r="9" fill="#111111"/><text x="210" y="322" font-size="22">至少 3 条本人消息</text>
+    <circle cx="180" cy="375" r="9" fill="#111111"/><text x="210" y="382" font-size="22">至少 100 个有效字符</text>
+    <circle cx="180" cy="435" r="9" fill="#111111"/><text x="210" y="442" font-size="22">覆盖可证明、线索不冲突</text>
+    <rect x="510" y="245" width="170" height="270" rx="26" fill="#FFFFFF" stroke="#2F6BFF" stroke-width="4"/>
+    <text x="595" y="352" text-anchor="middle" font-size="28" font-weight="700">证据门</text>
+    <text x="595" y="390" text-anchor="middle" font-size="17" fill="#666666">先拒绝过度推断</text>
+    <path d="M720 320 L810 320" stroke="#2F6BFF" stroke-width="4"/>
+    <path d="M720 445 L810 445" stroke="#999999" stroke-width="3" stroke-dasharray="8 8"/>
+    <rect x="820" y="260" width="240" height="120" rx="20" fill="#2F6BFF"/>
+    <text x="940" y="315" text-anchor="middle" font-size="24" font-weight="700" fill="#FFFFFF">可校准假设</text>
+    <text x="940" y="346" text-anchor="middle" font-size="16" fill="#FFFFFF">附置信度与边界</text>
+    <rect x="820" y="405" width="240" height="120" rx="20" fill="#FFFFFF" stroke="#111111"/>
+    <text x="940" y="460" text-anchor="middle" font-size="24" font-weight="700">无法判断</text>
+    <text x="940" y="491" text-anchor="middle" font-size="16" fill="#666666">六维留空 · 默认静默</text>
+  </g>
+</svg>

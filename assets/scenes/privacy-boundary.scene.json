@@ -1,0 +1,19 @@
+{
+  "canvas": {"width": 1200, "height": 675, "ratio": "16:9", "background": "#FFFFFF"},
+  "intent": {"core_message": "情绪数据只属于用户本人。", "composition": "layered-boundary", "focus_node": "self"},
+  "style": {"accent_color": "#2F6BFF"},
+  "nodes": [
+    {"id": "boundary", "type": "frame", "label": "私人边界", "importance": 4},
+    {"id": "self", "type": "circle", "label": "本人", "importance": 5},
+    {"id": "summary", "type": "rect", "label": "汇总记录", "importance": 3},
+    {"id": "hr", "type": "rect", "label": "HR与管理者", "importance": 2},
+    {"id": "decision", "type": "rect", "label": "人员决策", "importance": 2},
+    {"id": "raw", "type": "rect", "label": "消息原文", "importance": 2}
+  ],
+  "edges": [
+    {"from": "self", "to": "summary"},
+    {"from": "boundary", "to": "hr"},
+    {"from": "boundary", "to": "decision"},
+    {"from": "boundary", "to": "raw"}
+  ]
+}
