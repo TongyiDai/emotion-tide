@@ -70,6 +70,18 @@ class AnalysisContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unexpected fields"):
             validator.validate(payload)
 
+    def test_reaction_counts_must_be_consistent(self) -> None:
+        payload = self.sample()
+        payload["effective_reaction_count"] = payload["reaction_count"] + 1
+        with self.assertRaisesRegex(ValueError, "cannot exceed"):
+            validator.validate(payload)
+
+    def test_reactions_cannot_rescue_weak_text_evidence(self) -> None:
+        payload = self.sample()
+        payload.update({"message_count": 1, "effective_text_count": 1, "effective_char_count": 10, "reaction_count": 20, "effective_reaction_count": 15})
+        with self.assertRaisesRegex(ValueError, "weak evidence"):
+            validator.validate(payload)
+
 
 class WorkdayGateTests(unittest.TestCase):
     def config(self) -> dict:

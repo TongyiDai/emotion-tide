@@ -18,6 +18,8 @@ COVERAGE = {"complete", "partial", "no_user_messages", "unreadable"}
 DIMENSIONS = ("comfort", "energy", "calm", "agency", "connection", "clarity")
 ATTENTION = {"none", "human_attention"}
 ATTENTION_REASONS = {None, "explicit_immediate_risk"}
+REACTION_COVERAGE = {"complete", "partial", "unavailable"}
+REACTION_SIGNALS = {"none", "acknowledgement", "warmth", "celebration", "tension", "mixed", "ambiguous"}
 FORBIDDEN_DIAGNOSIS = ("抑郁症", "焦虑症", "躁郁症", "双相", "PTSD", "人格障碍", "确诊", "患者")
 
 
@@ -51,6 +53,8 @@ def validate(raw: dict[str, object]) -> dict[str, object]:
     required = {
         "date", "primary_emotion", "secondary_emotions", "intensity", "confidence",
         "coverage", "message_count", "effective_text_count", "effective_char_count",
+        "reaction_count", "effective_reaction_count", "reaction_coverage",
+        "reaction_signal", "reaction_summary",
         "observed", "inference", "uncertainty", "summary", "warm_words",
         "reflection_prompt", "micro_action", "dimensions", "attention_flag",
         "attention_reason",
@@ -76,13 +80,21 @@ def validate(raw: dict[str, object]) -> dict[str, object]:
     if coverage not in COVERAGE:
         fail("coverage is not allowed")
     counts: dict[str, int] = {}
-    for name in ("message_count", "effective_text_count", "effective_char_count"):
+    for name in ("message_count", "effective_text_count", "effective_char_count", "reaction_count", "effective_reaction_count"):
         value = raw[name]
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             fail(f"{name} must be a non-negative integer")
         counts[name] = value
     if counts["effective_text_count"] > counts["message_count"]:
         fail("effective_text_count cannot exceed message_count")
+    if counts["effective_reaction_count"] > counts["reaction_count"]:
+        fail("effective_reaction_count cannot exceed reaction_count")
+    if raw["reaction_coverage"] not in REACTION_COVERAGE:
+        fail("reaction_coverage is not allowed")
+    if raw["reaction_signal"] not in REACTION_SIGNALS:
+        fail("reaction_signal is not allowed")
+    if counts["reaction_count"] == 0 and raw["reaction_signal"] != "none":
+        fail("zero reactions require reaction_signal none")
 
     observed = raw["observed"]
     if not isinstance(observed, list) or len(observed) > 3:
@@ -133,6 +145,7 @@ def validate(raw: dict[str, object]) -> dict[str, object]:
         "warm_words": short_text("warm_words", raw["warm_words"], 120),
         "reflection_prompt": short_text("reflection_prompt", raw["reflection_prompt"], 80),
         "micro_action": short_text("micro_action", raw["micro_action"], 80),
+        "reaction_summary": short_text("reaction_summary", raw["reaction_summary"], 120),
         "evidence_level": "none" if no_evidence else "low" if weak_evidence else "medium" if confidence < 0.75 else "high",
     })
     return normalized

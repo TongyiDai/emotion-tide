@@ -8,6 +8,11 @@
   "message_count": 18,
   "effective_text_count": 11,
   "effective_char_count": 486,
+  "reaction_count": 7,
+  "effective_reaction_count": 3,
+  "reaction_coverage": "complete",
+  "reaction_signal": "warmth",
+  "reaction_summary": "事务确认较多，也有少量表达感谢和连接的表情。",
   "observed": [
     "多次主动推进具体事项",
     "傍晚出现精力下降的自述"
