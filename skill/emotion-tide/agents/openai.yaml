@@ -1,0 +1,4 @@
+interface:
+  display_name: "情绪潮汐"
+  short_description: "把本人飞书消息整理成可校准的私密情绪回顾与支持"
+  default_prompt: "使用 $emotion-tide 基于我本人今天发送的飞书消息，生成一份带证据边界、可自我校准的私密情绪回顾。"

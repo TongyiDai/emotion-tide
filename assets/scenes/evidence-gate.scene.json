@@ -1,0 +1,18 @@
+{
+  "canvas": {"width": 1200, "height": 675, "ratio": "16:9", "background": "#FFFFFF"},
+  "intent": {"core_message": "证据不足时，克制地拒绝判断。", "composition": "tension-contrast", "focus_node": "gate"},
+  "style": {"accent_color": "#2F6BFF"},
+  "nodes": [
+    {"id": "few", "type": "dot-grid", "label": "少于三条", "importance": 2},
+    {"id": "short", "type": "dot-grid", "label": "少于百字", "importance": 2},
+    {"id": "gate", "type": "frame", "label": "证据门", "importance": 5},
+    {"id": "reject", "type": "rect", "label": "无法判断", "importance": 4},
+    {"id": "enough", "type": "rect", "label": "可校准假设", "importance": 4}
+  ],
+  "edges": [
+    {"from": "few", "to": "gate"},
+    {"from": "short", "to": "gate"},
+    {"from": "gate", "to": "reject"},
+    {"from": "gate", "to": "enough"}
+  ]
+}

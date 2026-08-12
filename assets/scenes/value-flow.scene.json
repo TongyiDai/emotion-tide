@@ -1,0 +1,19 @@
+{
+  "canvas": {"width": 1200, "height": 675, "ratio": "16:9", "background": "#FFFFFF"},
+  "intent": {"core_message": "消息只经过必要处理，最终回到用户手中。", "composition": "axis-flow", "focus_node": "user"},
+  "style": {"accent_color": "#2F6BFF"},
+  "nodes": [
+    {"id": "messages", "type": "rect", "label": "本人消息", "importance": 3},
+    {"id": "gate", "type": "rect", "label": "证据门", "importance": 4},
+    {"id": "hypothesis", "type": "rect", "label": "文本假设", "importance": 4},
+    {"id": "support", "type": "rect", "label": "微小支持", "importance": 3},
+    {"id": "user", "type": "circle", "label": "用户校准", "importance": 5}
+  ],
+  "edges": [
+    {"from": "messages", "to": "gate"},
+    {"from": "gate", "to": "hypothesis"},
+    {"from": "hypothesis", "to": "support"},
+    {"from": "support", "to": "user"},
+    {"from": "user", "to": "hypothesis"}
+  ]
+}

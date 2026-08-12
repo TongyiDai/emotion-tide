@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2F6BFF"/></marker></defs>
+  <rect width="1200" height="675" fill="#FFFFFF"/>
+  <text x="72" y="82" font-family="PingFang SC, sans-serif" font-size="34" font-weight="700" fill="#111111">文字经过克制处理，解释权回到用户</text>
+  <text x="72" y="120" font-family="PingFang SC, sans-serif" font-size="18" fill="#666666">原文不落库 · 结论可修正 · 每次只给一个小行动</text>
+  <line x1="200" y1="330" x2="1000" y2="330" stroke="#D9DDE5" stroke-width="3"/>
+  <g font-family="PingFang SC, sans-serif" text-anchor="middle">
+    <g><rect x="82" y="270" width="190" height="120" rx="18" fill="#F5F7FA" stroke="#111111"/><text x="177" y="324" font-size="23" font-weight="600">本人消息</text><text x="177" y="356" font-size="16" fill="#777777">当天 · 工作日</text></g>
+    <g><rect x="312" y="270" width="190" height="120" rx="18" fill="#FFFFFF" stroke="#2F6BFF" stroke-width="3"/><text x="407" y="324" font-size="23" font-weight="600">证据门</text><text x="407" y="356" font-size="16" fill="#777777">不足就停止</text></g>
+    <g><rect x="542" y="270" width="190" height="120" rx="18" fill="#F5F7FA" stroke="#111111"/><text x="637" y="324" font-size="23" font-weight="600">文本假设</text><text x="637" y="356" font-size="16" fill="#777777">含置信度</text></g>
+    <g><rect x="772" y="270" width="190" height="120" rx="18" fill="#F5F7FA" stroke="#111111"/><text x="867" y="324" font-size="23" font-weight="600">微小支持</text><text x="867" y="356" font-size="16" fill="#777777">具体 · 可拒绝</text></g>
+    <g><circle cx="1070" cy="330" r="74" fill="#2F6BFF"/><text x="1070" y="325" font-size="23" font-weight="700" fill="#FFFFFF">用户校准</text><text x="1070" y="355" font-size="16" fill="#FFFFFF">最终解释权</text></g>
+  </g>
+  <g stroke="#2F6BFF" stroke-width="3" marker-end="url(#arrow)"><line x1="272" y1="330" x2="302" y2="330"/><line x1="502" y1="330" x2="532" y2="330"/><line x1="732" y1="330" x2="762" y2="330"/><line x1="962" y1="330" x2="984" y2="330"/></g>
+  <path d="M1070 420 C1070 535 640 550 640 404" fill="none" stroke="#2F6BFF" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+  <text x="850" y="525" font-family="PingFang SC, sans-serif" font-size="16" fill="#555555">历史反馈只用于调整下一次表达</text>
+</svg>

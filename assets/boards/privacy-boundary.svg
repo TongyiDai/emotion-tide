@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="#FFFFFF"/>
+  <text x="72" y="82" font-family="PingFang SC, sans-serif" font-size="34" font-weight="700" fill="#111111">情绪数据只属于用户本人</text>
+  <text x="72" y="120" font-family="PingFang SC, sans-serif" font-size="18" fill="#666666">自助工具的边界，决定它最终会帮助谁</text>
+  <rect x="80" y="175" width="640" height="400" rx="36" fill="#F7F9FF" stroke="#2F6BFF" stroke-width="4"/>
+  <text x="120" y="225" font-family="PingFang SC, sans-serif" font-size="18" fill="#2F6BFF">私人边界内</text>
+  <circle cx="300" cy="365" r="110" fill="#2F6BFF"/>
+  <text x="300" y="355" text-anchor="middle" font-family="PingFang SC, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">本人</text>
+  <text x="300" y="392" text-anchor="middle" font-family="PingFang SC, sans-serif" font-size="17" fill="#FFFFFF">可暂停 · 可删除</text>
+  <rect x="465" y="285" width="200" height="160" rx="22" fill="#FFFFFF" stroke="#111111"/>
+  <text x="565" y="352" text-anchor="middle" font-family="PingFang SC, sans-serif" font-size="24" font-weight="700">汇总记录</text>
+  <text x="565" y="386" text-anchor="middle" font-family="PingFang SC, sans-serif" font-size="16" fill="#666666">无消息原文</text>
+  <g font-family="PingFang SC, sans-serif">
+    <text x="790" y="225" font-size="18" fill="#777777">边界外 · 永久禁止</text>
+    <rect x="790" y="260" width="330" height="72" rx="16" fill="#F5F5F5"/><text x="955" y="305" text-anchor="middle" font-size="22">HR 与管理者监控</text>
+    <rect x="790" y="355" width="330" height="72" rx="16" fill="#F5F5F5"/><text x="955" y="400" text-anchor="middle" font-size="22">绩效、招聘与人员决策</text>
+    <rect x="790" y="450" width="330" height="72" rx="16" fill="#F5F5F5"/><text x="955" y="495" text-anchor="middle" font-size="22">消息原文、聊天名与人员 ID</text>
+  </g>
+  <line x1="750" y1="188" x2="750" y2="560" stroke="#111111" stroke-width="2" stroke-dasharray="7 8"/>
+</svg>
