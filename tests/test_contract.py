@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,9 +168,37 @@ class ProvisioningTests(unittest.TestCase):
 
     def test_unprovisioned_config_is_only_allowed_in_bootstrap_mode(self) -> None:
         config = self.example()
-        config.update({"lark_profile": "personal", "text_processing_consent": True})
+        config.update({"installation_id": "install_a", "lark_profile": "personal", "text_processing_consent": True})
         self.assertTrue(all(doctor.config_checks(config, allow_unprovisioned=True).values()))
         self.assertFalse(all(doctor.config_checks(config, allow_unprovisioned=False).values()))
+
+    def test_legacy_config_with_base_ids_never_infers_ready(self) -> None:
+        config = self.example()
+        config.pop("provisioning_state")
+        config.update({
+            "installation_id": None,
+            "lark_profile": "personal",
+            "text_processing_consent": True,
+            "owner_user_id": None,
+            "recipient_user_id": "user_a",
+            "base": {"url": "https://example.invalid/base/a", "base_token": "base_a", "table_id": "table_a", "dashboard_id": "dashboard_a"},
+        })
+        checks = doctor.config_checks(config, allow_unprovisioned=True)
+        self.assertFalse(checks["config_structure"])
+        self.assertFalse(checks["installation_id_configured"])
+        self.assertFalse(checks["provisioning_state_explicit"])
+        self.assertFalse(checks["provisioning_state_valid"])
+        self.assertFalse(checks["owner_binding_configured"])
+
+    def test_unprovisioned_binding_cannot_be_one_sided(self) -> None:
+        config = self.example()
+        config.update({
+            "installation_id": "install_a",
+            "lark_profile": "personal",
+            "text_processing_consent": True,
+            "recipient_user_id": "user_a",
+        })
+        self.assertFalse(doctor.config_checks(config, allow_unprovisioned=True)["owner_binding_configured"])
 
     def test_ready_config_requires_same_owner_and_recipient(self) -> None:
         config = self.example()
@@ -186,6 +216,23 @@ class ProvisioningTests(unittest.TestCase):
         self.assertFalse(doctor.real_value("YOUR_BASE_TOKEN"))
         self.assertFalse(doctor.real_value(None))
         self.assertTrue(doctor.real_value("base_created_for_current_user"))
+
+    def test_ready_base_probe_uses_configured_profile_and_user_identity(self) -> None:
+        config = self.example()
+        config.update({"lark_profile": "personal", "base": {"base_token": "base_a"}})
+        completed = SimpleNamespace(returncode=0, stdout='{"ok":true,"identity":"user"}')
+        with mock.patch.object(doctor.subprocess, "run", return_value=completed) as run:
+            self.assertTrue(doctor.ready_base_is_accessible(config, {}))
+        argv = run.call_args.args[0]
+        self.assertEqual(argv[argv.index("--profile") + 1], "personal")
+        self.assertEqual(argv[argv.index("--as") + 1], "user")
+
+    def test_ready_base_probe_fails_closed_on_forbidden(self) -> None:
+        config = self.example()
+        config.update({"lark_profile": "personal", "base": {"base_token": "base_a"}})
+        completed = SimpleNamespace(returncode=1, stdout="")
+        with mock.patch.object(doctor.subprocess, "run", return_value=completed):
+            self.assertFalse(doctor.ready_base_is_accessible(config, {}))
 
 
 if __name__ == "__main__":
