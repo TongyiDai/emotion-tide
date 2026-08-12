@@ -131,19 +131,19 @@ class ReactionSignalTests(unittest.TestCase):
                     "message_id": "om_message_a",
                     "msg_type": "text",
                     "reactions": {"details": [
-                        {"reaction_id": "r1", "action_time": "1786464000000", "emoji_type": "THUMBSUP", "operator": {"operator_id": "ou_self"}},
-                        {"reaction_id": "r2", "action_time": "1786467600000", "emoji_type": "HEART", "operator": {"operator_id": "ou_self"}},
-                        {"reaction_id": "r3", "action_time": "1786467600000", "emoji_type": "ANGRY", "operator": {"operator_id": "ou_other"}}
+                        {"reaction_id": "r1", "action_time": "1786464000000", "emoji_type": "THUMBSUP", "operator": {"operator_id": "test_user_self"}},
+                        {"reaction_id": "r2", "action_time": "1786467600000", "emoji_type": "HEART", "operator": {"operator_id": "test_user_self"}},
+                        {"reaction_id": "r3", "action_time": "1786467600000", "emoji_type": "ANGRY", "operator": {"operator_id": "test_user_other"}}
                     ]}
                 }]
             }
         }
-        result = reactions.aggregate(payload, "ou_self", 1786460400000, 1786546800000, "complete")
+        result = reactions.aggregate(payload, "test_user_self", 1786460400000, 1786546800000, "complete")
         self.assertEqual(result["reaction_count"], 2)
         self.assertEqual(result["effective_reaction_count"], 1)
         self.assertEqual(result["reaction_signal"], "warmth")
         self.assertNotIn("om_message_a", json.dumps(result))
-        self.assertNotIn("ou_self", json.dumps(result))
+        self.assertNotIn("test_user_self", json.dumps(result))
 
     def test_acknowledgement_is_not_effective_emotion_evidence(self) -> None:
         payload = {"reaction_id": "r1", "action_time": "1786464000000", "emoji_type": "LGTM", "operator": {"operator_id": "me"}}
