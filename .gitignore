@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.preview/
+tmp/
+config.json
+.env
+.env.*
+!.env.example
