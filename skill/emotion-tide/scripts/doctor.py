@@ -22,7 +22,7 @@ def main() -> None:
     parser.add_argument("--live", action="store_true", help="Also verify the configured Lark user profile")
     args = parser.parse_args()
     checks: dict[str, object] = {
-        "python": sys.version_info >= (3, 10),
+        "python": sys.version_info >= (3, 9),
         "lark_cli": shutil.which("lark-cli") is not None,
         "svg_to_png": shutil.which("sips") is not None or shutil.which("rsvg-convert") is not None,
         "config_exists": args.config.expanduser().is_file(),
