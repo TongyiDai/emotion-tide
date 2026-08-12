@@ -34,7 +34,7 @@
 
 ## 安装
 
-依赖：Python 3.10+、已完成用户身份授权的 `lark-cli`、Codex/Agent Skill 运行环境，以及可用的 SVG 转 PNG 工具。
+依赖：Python 3.9+、已完成用户身份授权的 `lark-cli`、Codex/Agent Skill 运行环境，以及可用的 SVG 转 PNG 工具。
 
 ```bash
 git clone https://github.com/TongyiDai/emotion-tide.git
