@@ -18,7 +18,7 @@
 
 ### 2. 绑定当前用户
 
-执行用户身份验证，取实时 `openId`。把它同时写入 `owner_user_id` 与 `recipient_user_id`。只允许 `identity=user` 且 `verified=true`。
+执行用户身份验证，取实时 `openId`。把它同时写入 `owner_user_id` 与 `recipient_user_id`。支持 `auth status --json --verify` 的环境必须满足 `identity=user` 且 `verified=true`；当前 CLI 构建若没有 `auth` 子命令，可退回 `contact +get-user --as user` 解析当前用户。仅 `task +get-my-tasks` 这种 user-context canary 不能用于 owner 绑定。
 
 运行：
 
