@@ -91,7 +91,7 @@ python3 skill/emotion-tide/scripts/validate_analysis.py examples/analysis.sample
 python3 skill/emotion-tide/scripts/render_dashboard.py --output /tmp/emotion-tide.svg < examples/analysis.sample.json
 ```
 
-示例数据完全虚构。测试覆盖：工作日/调休日门禁、零消息语义、弱证据拒答、多余字段拒绝、SVG 裁切和仪表盘雷达契约。
+示例数据完全虚构。测试覆盖：工作日/调休日门禁、零消息语义、弱证据拒答、多余字段拒绝、本人 reaction 过滤与去标识聚合、SVG 裁切和仪表盘雷达契约。
 
 ## 贡献原则
 
