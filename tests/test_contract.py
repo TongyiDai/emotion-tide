@@ -29,6 +29,7 @@ workday = load_module("emotion_tide_workday", SCRIPTS / "workday_gate.py")
 renderer = load_module("emotion_tide_renderer", SCRIPTS / "render_dashboard.py")
 reactions = load_module("emotion_tide_reactions", SCRIPTS / "extract_reaction_signals.py")
 doctor = load_module("emotion_tide_doctor", SCRIPTS / "doctor.py")
+probe = load_module("emotion_tide_probe", SCRIPTS / "lark_identity_probe.py")
 
 
 class AnalysisContractTests(unittest.TestCase):
@@ -233,6 +234,55 @@ class ProvisioningTests(unittest.TestCase):
         completed = SimpleNamespace(returncode=1, stdout="")
         with mock.patch.object(doctor.subprocess, "run", return_value=completed):
             self.assertFalse(doctor.ready_base_is_accessible(config, {}))
+
+
+class IdentityProbeTests(unittest.TestCase):
+    def completed(self, *, returncode: int, stdout: str = "", stderr: str = "") -> SimpleNamespace:
+        return SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
+
+    def test_supported_auth_failure_never_falls_through_to_contact(self) -> None:
+        with mock.patch.object(probe.shutil, "which", return_value="/usr/bin/lark-cli"), mock.patch.object(
+            probe.subprocess,
+            "run",
+            side_effect=[
+                self.completed(returncode=1, stdout='{"identity":"bot","verified":false}'),
+            ],
+        ) as run:
+            result = probe.probe_lark_identity()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["method"], "auth_status")
+        self.assertTrue(result["auth_supported"])
+        self.assertEqual(run.call_count, 1)
+
+    def test_contact_probe_resolves_subject_when_auth_command_is_missing(self) -> None:
+        with mock.patch.object(probe.shutil, "which", return_value="/usr/bin/lark-cli"), mock.patch.object(
+            probe.subprocess,
+            "run",
+            side_effect=[
+                self.completed(returncode=1, stderr="unknown command 'auth'"),
+                self.completed(returncode=0, stdout='{"ok":true,"identity":"user","data":{"user":{"open_id":"ou_123"}}}'),
+            ],
+        ):
+            result = probe.probe_lark_identity(require_subject=True)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["method"], "contact_self")
+        self.assertEqual(result["identity_assurance"], "resolved")
+        self.assertEqual(result["subject_id"], "ou_123")
+
+    def test_task_canary_cannot_satisfy_subject_requirement(self) -> None:
+        with mock.patch.object(probe.shutil, "which", return_value="/usr/bin/lark-cli"), mock.patch.object(
+            probe.subprocess,
+            "run",
+            side_effect=[
+                self.completed(returncode=1, stderr="unknown command 'auth'"),
+                self.completed(returncode=1, stdout='{"ok":false}'),
+                self.completed(returncode=0, stdout='{"ok":true,"identity":"user","data":{"items":[]}}'),
+            ],
+        ):
+            result = probe.probe_lark_identity(require_subject=True)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["method"], "task_canary")
+        self.assertEqual(result["identity_assurance"], "user_context")
 
 
 if __name__ == "__main__":

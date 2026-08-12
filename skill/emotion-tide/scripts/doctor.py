@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lark_identity_probe import probe_lark_identity
+
 
 VALID_MODES = {"agent_runtime", "local_only"}
 PLACEHOLDER_PREFIXES = ("YOUR_", "REPLACE_", "EXAMPLE_")
@@ -133,31 +136,22 @@ def main() -> None:
     if args.live and checks["lark_cli"] and checks.get("config_structure") and checks.get("profile_configured"):
         env = dict(os.environ)
         env.update({"LARKSUITE_CLI_NO_UPDATE_NOTIFIER": "1", "LARKSUITE_CLI_NO_SKILLS_NOTIFIER": "1"})
-        result = subprocess.run(
-            ["lark-cli", "auth", "status", "--profile", str(config["lark_profile"]), "--json", "--verify"],
-            capture_output=True,
-            text=True,
-            env=env,
-            check=False,
+        probe = probe_lark_identity(
+            profile=str(config["lark_profile"]), require_subject=True, require_profile=True, env=env
         )
-        try:
-            payload = json.loads(result.stdout)
-            verified = result.returncode == 0 and payload.get("identity") == "user" and payload.get("verified") is True
-            checks["lark_user_verified"] = verified
-            live_user = (((payload.get("identities") or {}).get("user") or {}).get("openId"))
-            owner = config.get("owner_user_id")
-            recipient = config.get("recipient_user_id")
-            state = configured_state(config)
-            if state == "ready":
-                checks["live_user_matches_owner"] = verified and real_value(live_user) and owner == recipient == live_user
-                checks["ready_base_accessible"] = verified and ready_base_is_accessible(config, env)
-            else:
-                unbound = owner is None and recipient is None
-                bound_to_live_user = real_value(live_user) and owner == recipient == live_user
-                checks["live_user_matches_owner"] = verified and (unbound or bound_to_live_user)
-        except json.JSONDecodeError:
-            checks["lark_user_verified"] = False
-            checks["live_user_matches_owner"] = False
+        identity_ready = probe["ok"] is True and probe["identity_assurance"] in {"verified", "resolved"}
+        checks["lark_user_verified"] = identity_ready
+        live_user = probe.get("subject_id")
+        owner = config.get("owner_user_id")
+        recipient = config.get("recipient_user_id")
+        state = configured_state(config)
+        if state == "ready":
+            checks["live_user_matches_owner"] = identity_ready and real_value(live_user) and owner == recipient == live_user
+            checks["ready_base_accessible"] = identity_ready and ready_base_is_accessible(config, env)
+        else:
+            unbound = owner is None and recipient is None
+            bound_to_live_user = real_value(live_user) and owner == recipient == live_user
+            checks["live_user_matches_owner"] = identity_ready and (unbound or bound_to_live_user)
     ok = all(value is True for value in checks.values())
     print(json.dumps({"ok": ok, "checks": checks}, ensure_ascii=False, indent=2))
     raise SystemExit(0 if ok else 1)
