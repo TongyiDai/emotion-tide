@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 
 VALID_MODES = {"agent_runtime", "local_only"}
@@ -24,30 +25,87 @@ def real_value(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip()) and not value.strip().upper().startswith(PLACEHOLDER_PREFIXES)
 
 
-def derived_state(config: dict[str, object]) -> str:
-    explicit = config.get("provisioning_state")
-    if isinstance(explicit, str):
-        return explicit
-    base = config.get("base")
-    return "ready" if isinstance(base, dict) and all(real_value(base.get(key)) for key in ("url", "base_token", "table_id", "dashboard_id")) else "unprovisioned"
+def configured_state(config: dict[str, object]) -> Optional[str]:
+    value = config.get("provisioning_state")
+    return value if isinstance(value, str) else None
+
+
+def binding_is_consistent(owner: object, recipient: object, *, ready: bool) -> bool:
+    if ready:
+        return real_value(owner) and real_value(recipient) and owner == recipient
+    if owner is None and recipient is None:
+        return True
+    return real_value(owner) and real_value(recipient) and owner == recipient
 
 
 def config_checks(config: dict[str, object], *, allow_unprovisioned: bool) -> dict[str, bool]:
     base = config.get("base")
-    base_ready = isinstance(base, dict) and all(real_value(base.get(key)) for key in ("url", "base_token", "table_id", "dashboard_id"))
-    state = derived_state(config)
-    owner = config.get("owner_user_id") or config.get("recipient_user_id")
+    base_keys = ("url", "base_token", "table_id", "dashboard_id")
+    base_ready = isinstance(base, dict) and all(real_value(base.get(key)) for key in base_keys)
+    base_recoverable = (
+        isinstance(base, dict)
+        and all(key in base for key in base_keys)
+        and all(base.get(key) is None or real_value(base.get(key)) for key in base_keys)
+    )
+    state = configured_state(config)
+    owner = config.get("owner_user_id")
     recipient = config.get("recipient_user_id")
     ready = state == "ready"
+    bootstrap = state == "unprovisioned" and allow_unprovisioned
     return {
-        "config_structure": all(key in config for key in ("timezone", "lark_profile", "recipient_user_id", "base", "workday_calendar")),
+        "config_structure": all(
+            key in config
+            for key in (
+                "version",
+                "provisioning_state",
+                "installation_id",
+                "timezone",
+                "lark_profile",
+                "owner_user_id",
+                "recipient_user_id",
+                "base",
+                "workday_calendar",
+            )
+        ),
+        "config_version_current": config.get("version") == 2,
+        "installation_id_configured": real_value(config.get("installation_id")),
         "profile_configured": real_value(config.get("lark_profile")),
         "processing_mode_valid": config.get("text_processing_mode") in VALID_MODES,
         "processing_consent": config.get("text_processing_consent") is True,
-        "provisioning_state_valid": state in ({"unprovisioned", "ready"} if allow_unprovisioned else {"ready"}),
-        "base_configured": (not ready and allow_unprovisioned) or base_ready,
-        "owner_binding_configured": (not ready and allow_unprovisioned) or (real_value(owner) and real_value(recipient) and owner == recipient),
+        "provisioning_state_explicit": state is not None,
+        "provisioning_state_valid": ready or bootstrap,
+        "base_configured": base_ready if ready else bootstrap and base_recoverable,
+        "owner_binding_configured": binding_is_consistent(owner, recipient, ready=ready) if ready or bootstrap else False,
     }
+
+
+def ready_base_is_accessible(config: dict[str, object], env: dict[str, str]) -> bool:
+    base = config.get("base")
+    if not isinstance(base, dict) or not real_value(base.get("base_token")):
+        return False
+    result = subprocess.run(
+        [
+            "lark-cli",
+            "base",
+            "+base-get",
+            "--profile",
+            str(config["lark_profile"]),
+            "--base-token",
+            str(base["base_token"]),
+            "--as",
+            "user",
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return False
+    return result.returncode == 0 and payload.get("ok") is True and payload.get("identity") == "user"
 
 
 def main() -> None:
@@ -87,13 +145,16 @@ def main() -> None:
             verified = result.returncode == 0 and payload.get("identity") == "user" and payload.get("verified") is True
             checks["lark_user_verified"] = verified
             live_user = (((payload.get("identities") or {}).get("user") or {}).get("openId"))
-            owner = config.get("owner_user_id") or config.get("recipient_user_id")
+            owner = config.get("owner_user_id")
             recipient = config.get("recipient_user_id")
-            state = derived_state(config)
+            state = configured_state(config)
             if state == "ready":
                 checks["live_user_matches_owner"] = verified and real_value(live_user) and owner == recipient == live_user
+                checks["ready_base_accessible"] = verified and ready_base_is_accessible(config, env)
             else:
-                checks["live_user_matches_owner"] = verified and (owner is None or owner == live_user) and (recipient is None or recipient == live_user)
+                unbound = owner is None and recipient is None
+                bound_to_live_user = real_value(live_user) and owner == recipient == live_user
+                checks["live_user_matches_owner"] = verified and (unbound or bound_to_live_user)
         except json.JSONDecodeError:
             checks["lark_user_verified"] = False
             checks["live_user_matches_owner"] = False

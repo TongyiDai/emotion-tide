@@ -60,4 +60,7 @@ python3 scripts/doctor.py --live
 
 - 配置为 `ready`：先核验当前用户、owner 与 Base 可读性；全部匹配才复用。
 - 配置为 `unprovisioned` 且已有部分 ID：先回读这些精确 ID，继续缺失步骤；不要重新创建。
+- 旧版配置缺少 `provisioning_state`、`installation_id` 或显式 `owner_user_id`：完整 doctor 必须失败。先保留一份私密备份，再按 `unprovisioned` 处理，禁止根据已填写的 Base 字段推断为 `ready`。
+- 判断身份时只认配置中的 `lark_profile` 及其实时 `openId`。默认 profile 只用于发现身份错配，不能用来接管、否定或替代配置身份。
+- 旧版配置中的精确 Base ID 只有在配置 profile 可读、owner/recipient/live user 三者一致且权限回读通过时才允许迁移；遇到 `91403`、owner 不一致或来源无法证明时清空绑定并创建新 Base。
 - 配置文件丢失：把它视为新安装。不得按“情绪潮汐”标题搜索并自动接管同名 Base；用户可显式提供自己原有 Base URL，再走归属与权限回读。
