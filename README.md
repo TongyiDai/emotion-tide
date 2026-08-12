@@ -44,18 +44,18 @@ cp emotion-tide/skill/emotion-tide/config.example.json ~/.config/emotion-tide/co
 chmod 600 ~/.config/emotion-tide/config.json
 ```
 
-编辑私有配置后运行：
+首次启用时不要填写或复用任何现成 Base token。先填入自己的飞书 profile，并让 Agent 在该用户身份下创建全新的 Base：
 
 ```bash
 export EMOTION_TIDE_CONFIG="$HOME/.config/emotion-tide/config.json"
-python3 ~/.codex/skills/emotion-tide/scripts/doctor.py --live
+python3 ~/.codex/skills/emotion-tide/scripts/doctor.py --live --allow-unprovisioned
 ```
 
 首次对话可直接说：
 
-> 请帮我安装“情绪潮汐”：使用我的飞书用户身份，创建一个私人 Base 和含六维雷达图的仪表盘；只分析我本人当天发送的消息；工作日 17:50 运行；非工作日静默跳过；先告诉我消息会在哪里处理，并等我同意后再启用。
+> 请帮我安装“情绪潮汐”：这是我的首次使用，请在我当前验证通过的飞书用户身份下新建一套只属于我的 Base、数据表和含六维雷达图的仪表盘；不要复用维护者、仓库示例、其他用户或同名 Base 的任何 token；回读 owner 和权限后再创建工作日 17:50 自动化。只分析我本人当天发送的消息，非工作日静默跳过；先告诉我消息会在哪里处理，并等我同意后再启用。
 
-配置中的 Base token、表 ID、接收人 ID 和飞书 profile 属于私密信息，禁止提交到 Git。年度工作日表应引用当地政府或其他权威来源；年份缺失时任务会关闭执行。
+每个安装实例都执行 `unprovisioned → 创建当前用户 Base → 回读 owner/权限 → ready`。只有 owner、通知接收人与当前登录用户一致时才启用自动化。配置中的 Base token、表 ID、接收人 ID 和飞书 profile 属于私密信息，禁止提交到 Git。年度工作日表应引用当地政府或其他权威来源；年份缺失时任务会关闭执行。
 
 ## 多维表格与仪表盘
 

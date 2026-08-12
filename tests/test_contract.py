@@ -26,6 +26,7 @@ validator = load_module("emotion_tide_validator", SCRIPTS / "validate_analysis.p
 workday = load_module("emotion_tide_workday", SCRIPTS / "workday_gate.py")
 renderer = load_module("emotion_tide_renderer", SCRIPTS / "render_dashboard.py")
 reactions = load_module("emotion_tide_reactions", SCRIPTS / "extract_reaction_signals.py")
+doctor = load_module("emotion_tide_doctor", SCRIPTS / "doctor.py")
 
 
 class AnalysisContractTests(unittest.TestCase):
@@ -150,6 +151,41 @@ class ReactionSignalTests(unittest.TestCase):
         result = reactions.aggregate(payload, "me", 1786460400000, 1786546800000, "complete")
         self.assertEqual(result["reaction_signal"], "acknowledgement")
         self.assertEqual(result["effective_reaction_count"], 0)
+
+
+class ProvisioningTests(unittest.TestCase):
+    def example(self) -> dict:
+        return json.loads((ROOT / "skill" / "emotion-tide" / "config.example.json").read_text(encoding="utf-8"))
+
+    def test_public_example_contains_no_reusable_identity_or_base(self) -> None:
+        config = self.example()
+        self.assertEqual(config["provisioning_state"], "unprovisioned")
+        self.assertIsNone(config["owner_user_id"])
+        self.assertIsNone(config["recipient_user_id"])
+        self.assertTrue(all(value is None for value in config["base"].values()))
+
+    def test_unprovisioned_config_is_only_allowed_in_bootstrap_mode(self) -> None:
+        config = self.example()
+        config.update({"lark_profile": "personal", "text_processing_consent": True})
+        self.assertTrue(all(doctor.config_checks(config, allow_unprovisioned=True).values()))
+        self.assertFalse(all(doctor.config_checks(config, allow_unprovisioned=False).values()))
+
+    def test_ready_config_requires_same_owner_and_recipient(self) -> None:
+        config = self.example()
+        config.update({
+            "provisioning_state": "ready",
+            "lark_profile": "personal",
+            "text_processing_consent": True,
+            "owner_user_id": "user_a",
+            "recipient_user_id": "user_b",
+            "base": {"url": "https://example.invalid/base/a", "base_token": "base_a", "table_id": "table_a", "dashboard_id": "dashboard_a"},
+        })
+        self.assertFalse(doctor.config_checks(config, allow_unprovisioned=False)["owner_binding_configured"])
+
+    def test_placeholders_are_never_real_values(self) -> None:
+        self.assertFalse(doctor.real_value("YOUR_BASE_TOKEN"))
+        self.assertFalse(doctor.real_value(None))
+        self.assertTrue(doctor.real_value("base_created_for_current_user"))
 
 
 if __name__ == "__main__":

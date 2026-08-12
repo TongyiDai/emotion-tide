@@ -11,12 +11,15 @@ description: "通过飞书 CLI 读取当前用户本人在指定工作日时间�
 
 ## 首次运行
 
-1. 运行 `python3 scripts/doctor.py --live`。
-2. 默认读取 `${EMOTION_TIDE_CONFIG:-~/.config/emotion-tide/config.json}`。配置不存在时，基于 `config.example.json` 建立用户私有配置；权限设为 `600`，不得放进仓库或聊天。
-3. 明确告知用户文本处理位置：`agent_runtime` 可能把消息文本发送给当前模型提供方；`local_only` 仅允许已配置的本地模型。首次运行必须取得同意并写入 `text_processing_consent=true`。未同意就停止。
-4. 使用 `lark-cli auth status --profile <profile> --json --verify` 确认 `identity=user`、`verified=true`，再获取当前用户 ID。禁止切换 bot 或另一租户兜底。
-5. 创建个人 Base、表和仪表盘后，核验只有当前用户这一名协作者，关闭链接分享；若外部访问状态无法可靠确认，必须让用户在飞书权限界面确认，不能声称“仅本人可见”。
-6. 配置当年官方工作日表。没有可核验的当年日历时，工作日门禁返回 `unknown` 并静默退出。
+先读取 `references/first-run-provisioning.md`，严格执行以下归属约束：每个用户、每个飞书身份都创建一套独立 Base。仓库、维护者、其他用户或其他租户的 Base token 永远不能作为模板、默认值或兜底。
+
+1. 默认读取 `${EMOTION_TIDE_CONFIG:-~/.config/emotion-tide/config.json}`。配置不存在时，基于 `config.example.json` 建立 `provisioning_state=unprovisioned` 的用户私有配置；权限设为 `600`，不得放进仓库或聊天。
+2. 明确告知用户文本处理位置：`agent_runtime` 可能把消息文本发送给当前模型提供方；`local_only` 仅允许已配置的本地模型。首次运行必须取得同意并写入 `text_processing_consent=true`。未同意就停止。
+3. 填入用户选择的 `lark_profile`，运行 `python3 scripts/doctor.py --live --allow-unprovisioned`。必须确认 `identity=user`、`verified=true`；禁止切换 bot 或另一租户兜底。
+4. 生成本地随机 `installation_id`，使用刚验证的用户身份创建全新的个人 Base、唯一初始表和仪表盘。把实时返回的 owner ID、Base URL/token、table ID、dashboard ID 写入该用户私有配置；不得从 README、示例配置、环境变量或现有同名 Base 猜测这些值。
+5. 创建后回读 Base owner，要求 `owner_user_id == recipient_user_id == 当前验证用户 ID`；再核验只有当前用户这一名协作者，关闭链接分享和组织外分享能力。任何一项无法证明时保持 `unprovisioned`，不创建自动化，不声称“仅本人可见”。
+6. 全部回读通过后才把 `provisioning_state` 改为 `ready`，再运行 `python3 scripts/doctor.py --live`。重复安装时只有 `ready` 配置、owner 匹配且 Base 可读才允许复用；配置缺失时不得按标题搜索并接管现有 Base。
+7. 配置当年官方工作日表。没有可核验的当年日历时，工作日门禁返回 `unknown` 并静默退出。
 
 ## 每次运行
 
@@ -125,6 +128,7 @@ python3 scripts/validate_analysis.py
 
 ## 参考
 
+- 首次独立 Base 初始化：`references/first-run-provisioning.md`
 - 输出与字段：`references/output-schema.md`
 - 模型与证据：`references/model-selection.md`
 - 伦理与帮助边界：`references/safety-and-support.md`
