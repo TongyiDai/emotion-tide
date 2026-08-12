@@ -42,6 +42,18 @@ python3 scripts/workday_gate.py --config "$EMOTION_TIDE_CONFIG" --date YYYY-MM-D
 
 另做一次“本人主动表情”读取：消息拉取快捷命令默认附带 `reactions.details`。只保留 `operator.operator_id == 当前用户 ID` 且 `action_time` 位于当天时间窗内的表情记录，按 `reaction_id` 去重。要覆盖用户在别人消息上添加的表情，必须读取当天可见消息，不能只搜索本人发送的消息；覆盖无法证明时设 `reaction_coverage=partial`。别人给用户消息添加的表情不进入用户情绪分析。
 
+把当天可见消息 JSON 直接通过 stdin 交给确定性聚合器；不要先把原文写到磁盘：
+
+```bash
+python3 scripts/extract_reaction_signals.py \
+  --config "$EMOTION_TIDE_CONFIG" \
+  --start 'YYYY-MM-DDT00:00:00+08:00' \
+  --end 'YYYY-MM-DDT17:50:00+08:00' \
+  --coverage complete
+```
+
+聚合器只输出计数、覆盖状态、分类与一句摘要，不输出消息、消息 ID、reaction ID 或人员 ID。若消息拉取出现 reaction batch warning、分页截断或权限失败，调用时必须把 coverage 降为 `partial` 或 `unavailable`。
+
 本人直接发送的 Unicode Emoji 已包含在文本上下文里，不重复计数。`sticker` 只能统计发送次数；OpenAPI 不提供稳定语义时归为模糊线索，不下载或识图猜测。
 
 ### 2. 数据最小化
