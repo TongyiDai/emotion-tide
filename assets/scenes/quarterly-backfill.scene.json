@@ -1,0 +1,15 @@
+{
+  "canvas": {"width": 1200, "height": 675, "ratio": "16:9", "background": "#FFFFFF"},
+  "intent": {"core_message": "首次建表即把过去一个季度的工作日逐日盘点、沉淀进 Base，跳过非工作日，可断点续跑。", "composition": "timeline-into-store", "focus_node": "base"},
+  "style": {"accent_color": "#2F6BFF"},
+  "nodes": [
+    {"id": "workday", "type": "point-filled", "label": "工作日 · 逐日分析", "importance": 4},
+    {"id": "skip", "type": "point-hollow", "label": "周末/节假日 · 跳过", "importance": 2},
+    {"id": "batch", "type": "bracket", "label": "分批 · 退避", "importance": 3},
+    {"id": "base", "type": "rect", "label": "多维表格 + 仪表盘", "importance": 5}
+  ],
+  "edges": [
+    {"from": "workday", "to": "base"},
+    {"from": "base", "to": "workday", "style": "dashed", "label": "last_completed_date 断点续跑"}
+  ]
+}

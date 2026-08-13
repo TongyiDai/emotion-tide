@@ -54,7 +54,11 @@ python3 scripts/doctor.py --live --allow-unprovisioned
 python3 scripts/doctor.py --live
 ```
 
-只有全部检查通过后才创建 17:50 自动化。
+只有全部检查通过后，才进入开箱即用的季度盘点，然后创建 17:50 自动化。
+
+### 6. 季度盘点（开箱即用）
+
+`ready` 且 `text_processing_consent=true` 后，按 `references/quarterly-backfill.md` 回填过去约一个季度的工作日记录，让新 Base 一开始就有趋势可看。前置硬门槛：实时用户=owner=接收人、回填窗口所有年份的官方工作日日历齐全。回填复用每日流程的同一套读取、聚合、校验和按日期幂等 upsert，串行带退避、可断点续跑，逐日不出图、不通知。回填完成后再创建 17:50 自动化，并按当天做一次正常的当日回顾。
 
 ## 重装与恢复
 

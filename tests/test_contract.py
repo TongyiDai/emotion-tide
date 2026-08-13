@@ -30,6 +30,7 @@ renderer = load_module("emotion_tide_renderer", SCRIPTS / "render_dashboard.py")
 reactions = load_module("emotion_tide_reactions", SCRIPTS / "extract_reaction_signals.py")
 doctor = load_module("emotion_tide_doctor", SCRIPTS / "doctor.py")
 probe = load_module("emotion_tide_probe", SCRIPTS / "lark_identity_probe.py")
+backfill = load_module("emotion_tide_backfill", SCRIPTS / "backfill_plan.py")
 
 
 class AnalysisContractTests(unittest.TestCase):
@@ -125,6 +126,147 @@ class WorkdayGateTests(unittest.TestCase):
                 check=False,
             )
         self.assertEqual(result.returncode, 3)
+
+    def test_multi_year_calendar_resolves_prior_year(self) -> None:
+        import datetime as dt
+
+        config = {
+            "workday_calendar": {
+                "year": 2026,
+                "workdays": [],
+                "holidays": [],
+                "years": [
+                    {"year": 2025, "workdays": [], "holidays": ["2025-12-25"]},
+                ],
+            }
+        }
+        self.assertEqual(workday.classify(dt.date(2025, 12, 25), config)["status"], "non_workday")
+        self.assertEqual(workday.classify(dt.date(2025, 12, 24), config)["status"], "workday")
+        self.assertEqual(workday.classify(dt.date(2024, 1, 2), config)["status"], "unknown")
+
+
+class BackfillPlanTests(unittest.TestCase):
+    def config(self) -> dict:
+        return {
+            "timezone": "Asia/Shanghai",
+            "workday_calendar": {
+                "year": 2026,
+                "source_url": "https://www.gov.cn/",
+                "utc_offset": "+08:00",
+                "workdays": [],
+                "holidays": ["2026-02-16"],
+                "years": [
+                    {"year": 2025, "source_url": "https://www.gov.cn/", "workdays": [], "holidays": []},
+                ],
+            },
+        }
+
+    def test_plan_is_oldest_first_and_skips_non_workdays(self) -> None:
+        import datetime as dt
+
+        result = backfill.plan(
+            self.config(),
+            as_of=dt.date(2026, 2, 20),
+            start=dt.date(2026, 2, 9),
+            end=dt.date(2026, 2, 19),
+            offset="+08:00",
+            done=set(),
+            limit=None,
+        )
+        dates = [item["date"] for item in result["pending"]]
+        self.assertEqual(dates, sorted(dates))
+        self.assertNotIn("2026-02-14", dates)  # Saturday
+        self.assertNotIn("2026-02-15", dates)  # Sunday
+        self.assertNotIn("2026-02-16", dates)  # official holiday
+        self.assertTrue(result["calendar_complete"])
+        first = result["pending"][0]
+        self.assertEqual(first["start"], f"{first['date']}T00:00:00+08:00")
+
+    def test_done_dates_are_idempotently_skipped(self) -> None:
+        import datetime as dt
+
+        result = backfill.plan(
+            self.config(),
+            as_of=dt.date(2026, 2, 20),
+            start=dt.date(2026, 2, 9),
+            end=dt.date(2026, 2, 13),
+            offset="+08:00",
+            done={"2026-02-09", "2026-02-10"},
+            limit=None,
+        )
+        dates = [item["date"] for item in result["pending"]]
+        self.assertNotIn("2026-02-09", dates)
+        self.assertNotIn("2026-02-10", dates)
+        self.assertEqual(result["counts"]["already_done"], 2)
+
+    def test_limit_batches_and_reports_remaining(self) -> None:
+        import datetime as dt
+
+        result = backfill.plan(
+            self.config(),
+            as_of=dt.date(2026, 2, 20),
+            start=dt.date(2026, 2, 9),
+            end=dt.date(2026, 2, 13),
+            offset="+08:00",
+            done=set(),
+            limit=2,
+        )
+        self.assertEqual(len(result["pending"]), 2)
+        self.assertEqual(result["counts"]["pending"], 5)
+        self.assertEqual(result["remaining_after_limit"], 3)
+
+    def test_missing_year_marks_calendar_incomplete(self) -> None:
+        import datetime as dt
+
+        config = self.config()
+        config["workday_calendar"]["years"] = []  # drop 2025
+        result = backfill.plan(
+            config,
+            as_of=dt.date(2026, 1, 5),
+            start=dt.date(2025, 12, 29),
+            end=dt.date(2026, 1, 2),
+            offset="+08:00",
+            done=set(),
+            limit=None,
+        )
+        self.assertFalse(result["calendar_complete"])
+        self.assertIn("2025-12-29", result["unknown_dates"])
+
+    def test_incomplete_calendar_exits_five(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config = self.config()
+            config["workday_calendar"]["years"] = []
+            config_path = Path(directory) / "config.json"
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPTS / "backfill_plan.py"),
+                    "--config", str(config_path),
+                    "--as-of", "2026-01-05",
+                    "--start", "2025-12-29",
+                    "--end", "2026-01-02",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 5)
+
+    def test_plan_emits_no_message_text_or_ids(self) -> None:
+        import datetime as dt
+
+        result = backfill.plan(
+            self.config(),
+            as_of=dt.date(2026, 2, 20),
+            start=dt.date(2026, 2, 9),
+            end=dt.date(2026, 2, 11),
+            offset="+08:00",
+            done=set(),
+            limit=None,
+        )
+        blob = json.dumps(result, ensure_ascii=False)
+        self.assertNotIn("om_", blob)
+        self.assertNotIn("ou_", blob)
 
 
 class ReactionSignalTests(unittest.TestCase):
