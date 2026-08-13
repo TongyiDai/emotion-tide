@@ -1,6 +1,6 @@
 ---
 name: emotion-tide
-description: "通过飞书 CLI 读取当前用户本人在指定工作日时间窗内发送的消息，生成带不确定性说明的私密情绪回顾、微小支持行动、当天图片和个人 Base 趋势仪表盘。用户提到情绪潮汐、每日情绪回顾、根据本人飞书消息整理状态、情绪日记或个人情绪趋势时使用。仅限本人自愿自助，不得用于员工监控、HR 判断、绩效、招聘、教育评估或第三方画像。"
+description: "通过飞书 CLI 读取当前用户本人在指定工作日时间窗内发送的消息，生成带不确定性说明的私密情绪回顾、微小支持行动、当天图片和个人 Base 趋势仪表盘。首次创建多维表格时开箱即用地把过去约一个季度的消息按工作日盘点、沉淀进 Base。用户提到情绪潮汐、每日情绪回顾、根据本人飞书消息整理状态、情绪日记或个人情绪趋势时使用。仅限本人自愿自助，不得用于员工监控、HR 判断、绩效、招聘、教育评估或第三方画像。"
 ---
 
 # 情绪潮汐
@@ -19,7 +19,8 @@ description: "通过飞书 CLI 读取当前用户本人在指定工作日时间�
 4. 生成本地随机 `installation_id`，使用刚验证的用户身份创建全新的个人 Base、唯一初始表和仪表盘。把实时返回的 owner ID、Base URL/token、table ID、dashboard ID 写入该用户私有配置；不得从 README、示例配置、环境变量或现有同名 Base 猜测这些值。
 5. 创建后回读 Base owner，要求 `owner_user_id == recipient_user_id == 当前验证用户 ID`；再核验只有当前用户这一名协作者，关闭链接分享和组织外分享能力。任何一项无法证明时保持 `unprovisioned`，不创建自动化，不声称“仅本人可见”。
 6. 全部回读通过后才把 `provisioning_state` 改为 `ready`，再运行 `python3 scripts/doctor.py --live`。doctor 必须实际读取 Base；缺少显式状态、安装 ID 或 owner 时不得推断就绪。重复安装时只有 `ready` 配置、owner 匹配且 Base 可读才允许复用；配置缺失时不得按标题搜索并接管现有 Base。
-7. 配置当年官方工作日表。没有可核验的当年日历时，工作日门禁返回 `unknown` 并静默退出。
+7. 配置当年官方工作日表。没有可核验的当年日历时，工作日门禁返回 `unknown` 并静默退出。回填会回看约一个季度，可能跨年，因此还要配置回填窗口涉及的其他年份日历（`workday_calendar.years`）。
+8. 开箱即用的季度盘点：初始化全部回读通过、`text_processing_consent=true`、且回填窗口的日历完整后，立即按 `references/quarterly-backfill.md` 把过去约一个季度的工作日逐日盘点、幂等写入 Base，让仪表盘一开始就有历史趋势可看。回填串行推进、可断点续跑，逐日不发通知、不出图。回填完成后再创建 17:50 自动化，并按当天做一次正常的当日回顾。
 
 ## 每次运行
 
@@ -113,6 +114,26 @@ python3 scripts/validate_analysis.py
 
 先发送 PNG，再发送短文字和 Base 入口；图片与文字使用不同的日期幂等 key。图片失败时发文字并标记 `visual_notification_failed`；文字失败时保留已回读记录并标记 `notification_failed`。
 
+## 首次运行的季度盘点
+
+初始化后 Base 是空的，只有连续多天运行才积累出趋势。为让仪表盘开箱即用，`ready` 后立即回填过去约一个季度的工作日记录。完整流程与安全边界见 `references/quarterly-backfill.md`，要点：
+
+- 前置硬门槛：`ready` + 完整 doctor 通过、实时用户=owner=接收人、`text_processing_consent=true`、回填窗口所有年份日历齐全。
+- 先读 Base “日期”列拿到已存在日期写入临时文件，再规划（不联网、不读消息）：
+
+```bash
+python3 scripts/backfill_plan.py \
+  --config "$EMOTION_TIDE_CONFIG" \
+  --as-of YYYY-MM-DD \
+  --lookback-days 90 \
+  --done-dates-file "$TASK_TMP/done-dates.json" \
+  --limit 12
+```
+
+- 对 `pending`（从旧到新）逐日执行与“每次运行”完全相同的读取、聚合、生成、校验、幂等 upsert；串行带退避，避免 Base 写入限流。
+- 回填期默认不逐日出图、不逐日通知（`backfill.render_per_day`、`notify_per_day` 均为 `false`）；历史日不追溯触发危机干预，命中只在汇报里说明。
+- 按 `--limit` 分批推进，`backfill.last_completed_date` 支持断点续跑；`remaining_after_limit>0` 时提示用户可再次运行继续。回填完成后再进入常规每日流程。
+
 ## 安全边界
 
 - 仅处理当前用户本人消息，仅把结果返回给当前用户本人。
@@ -129,6 +150,7 @@ python3 scripts/validate_analysis.py
 ## 参考
 
 - 首次独立 Base 初始化：`references/first-run-provisioning.md`
+- 开箱即用季度盘点：`references/quarterly-backfill.md`
 - 输出与字段：`references/output-schema.md`
 - 模型与证据：`references/model-selection.md`
 - 伦理与帮助边界：`references/safety-and-support.md`

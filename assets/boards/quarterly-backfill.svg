@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2F6BFF"/></marker></defs>
+  <rect width="1200" height="675" fill="#FFFFFF"/>
+  <text x="72" y="82" font-family="PingFang SC, sans-serif" font-size="34" font-weight="700" fill="#111111">开箱即用：过去一个季度按工作日盘点</text>
+  <text x="72" y="120" font-family="PingFang SC, sans-serif" font-size="18" fill="#666666">首次建表即回填 · 跳过非工作日 · 幂等可断点续跑</text>
+
+  <text x="72" y="196" font-family="PingFang SC, sans-serif" font-size="16" fill="#777777">过去约 90 天</text>
+  <line x1="120" y1="250" x2="1010" y2="250" stroke="#D9DDE5" stroke-width="3"/>
+
+  <!-- Filled points = analyzed workdays; hollow points = skipped non-workdays -->
+  <g>
+    <circle cx="140" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="190" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="240" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="290" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="340" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="390" cy="250" r="9" fill="#FFFFFF" stroke="#B8BFCC" stroke-width="2.5"/>
+    <circle cx="440" cy="250" r="9" fill="#FFFFFF" stroke="#B8BFCC" stroke-width="2.5"/>
+    <circle cx="490" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="540" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="590" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="640" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="690" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="740" cy="250" r="9" fill="#FFFFFF" stroke="#B8BFCC" stroke-width="2.5"/>
+    <circle cx="790" cy="250" r="9" fill="#FFFFFF" stroke="#B8BFCC" stroke-width="2.5"/>
+    <circle cx="840" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="890" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="940" cy="250" r="9" fill="#2F6BFF"/>
+    <circle cx="990" cy="250" r="9" fill="#2F6BFF"/>
+  </g>
+
+  <g font-family="PingFang SC, sans-serif" font-size="16">
+    <circle cx="140" cy="320" r="8" fill="#2F6BFF"/><text x="158" y="325" fill="#333333">工作日 · 逐日分析并写入</text>
+    <circle cx="420" cy="320" r="8" fill="#FFFFFF" stroke="#B8BFCC" stroke-width="2.5"/><text x="438" y="325" fill="#333333">周末 / 节假日 · 静默跳过</text>
+  </g>
+
+  <!-- flow into the store -->
+  <g stroke="#2F6BFF" stroke-width="3" marker-end="url(#arrow)">
+    <line x1="565" y1="392" x2="565" y2="452"/>
+  </g>
+
+  <!-- Base + dashboard store -->
+  <g font-family="PingFang SC, sans-serif" text-anchor="middle">
+    <rect x="360" y="462" width="410" height="150" rx="20" fill="#FFFFFF" stroke="#2F6BFF" stroke-width="3"/>
+    <text x="565" y="518" font-size="25" font-weight="700" fill="#111111">多维表格 + 仪表盘</text>
+    <text x="565" y="556" font-size="16" fill="#777777">趋势 · 分布 · 六维雷达 一开始就有历史</text>
+    <text x="565" y="586" font-size="15" fill="#999999">按日期幂等 upsert · 不落原文</text>
+  </g>
+
+  <!-- resumable return path -->
+  <path d="M770 537 C900 537 900 250 1010 250" fill="none" stroke="#2F6BFF" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+  <text x="905" y="440" font-family="PingFang SC, sans-serif" font-size="15" fill="#555555" text-anchor="middle">被限额打断，从 last_completed_date 续跑</text>
+
+  <text x="72" y="640" font-family="PingFang SC, sans-serif" font-size="15" fill="#999999">隐私边界不变：只读本人消息，原文只在运行时，Base 与图片不落原文、聊天名或 ID。</text>
+</svg>

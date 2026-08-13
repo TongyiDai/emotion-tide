@@ -1,4 +1,4 @@
 interface:
   display_name: "情绪潮汐"
   short_description: "把本人飞书消息整理成可校准的私密情绪回顾与支持"
-  default_prompt: "使用 $emotion-tide 为我设置私密情绪回顾；如果是首次使用，先在我自己的飞书身份下创建一套独立 Base 和仪表盘，再按工作日规则运行。"
+  default_prompt: "使用 $emotion-tide 为我设置私密情绪回顾；如果是首次使用，先在我自己的飞书身份下创建一套独立 Base 和仪表盘，再开箱即用地把过去约一个季度的消息按工作日盘点并沉淀进 Base，之后按工作日规则运行。"

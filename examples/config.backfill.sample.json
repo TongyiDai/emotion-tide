@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "provisioning_state": "unprovisioned",
-  "installation_id": null,
+  "provisioning_state": "ready",
+  "installation_id": "example_install",
   "timezone": "Asia/Shanghai",
   "schedule": "17:50",
-  "lark_profile": null,
+  "lark_profile": "personal",
   "owner_user_id": null,
   "recipient_user_id": null,
   "text_processing_mode": "agent_runtime",
-  "text_processing_consent": false,
+  "text_processing_consent": true,
   "notify_on_no_evidence": false,
   "base": {
     "url": null,
@@ -26,13 +26,20 @@
     "state": "not_started"
   },
   "workday_calendar": {
-    "year": null,
-    "source_url": null,
-    "source_title": "",
+    "year": 2026,
+    "source_url": "https://www.gov.cn/",
+    "source_title": "示例：官方节假日安排（占位，非真实数据）",
     "utc_offset": "+08:00",
-    "workdays": [],
-    "holidays": [],
-    "years": []
+    "workdays": ["2026-02-08"],
+    "holidays": ["2026-01-01", "2026-02-16", "2026-02-17"],
+    "years": [
+      {
+        "year": 2025,
+        "source_url": "https://www.gov.cn/",
+        "workdays": [],
+        "holidays": ["2025-12-25"]
+      }
+    ]
   },
   "crisis_support": {
     "country": null,
