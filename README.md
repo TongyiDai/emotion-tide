@@ -71,7 +71,13 @@ python3 ~/.codex/skills/emotion-tide/scripts/doctor.py --live --allow-unprovisio
 
 ## 多维表格与仪表盘
 
-Base 保存日期、汇总标签、证据计数、本人表情回应、六维文本信号和用户自愿反馈，不保存消息原文。仪表盘至少包含：记录天数、平均置信度、情绪强度趋势、文字表达活跃度趋势、本人表情回应趋势、主情绪分布、六维状态轮廓和方法说明。
+Base 保存日期、汇总标签、证据计数、本人表情回应、六维文本信号和用户自愿反馈，不保存消息原文。仪表盘尽量丰富地展示（约 15 个组件）：置顶「最近总结」文本块与方法说明；四张指标卡（记录天数、平均置信度、平均情绪强度、平均帮助程度）；趋势区（强度×置信度组合图、情绪强度趋势、文字表达活跃度、本人表情回应）；分布区（主情绪、覆盖质量、表情互动线索、用户校准）；六维状态轮廓雷达；可选的辅助情绪词云。所有图表只消费已写入的汇总字段，**不新增 Base 字段、不含消息原文**。
+
+<p align="center">
+  <img src="assets/boards/dashboard-layout.svg" alt="约 15 个组件的仪表盘布局与每日改写的顶部总结" width="100%" />
+</p>
+
+**顶部「最近总结」每天更新**：单独的图表价值有限，因此顶部放一个每日改写的文本块。每天写入当天记录后，Skill 读回最近约 14 个工作日的**已校验汇总字段**（不碰消息原文），用确定性聚合器 `summarize_window.py` 得到窗口计数、均值、分布与上/下半段强度趋势，再由结构化模型写一小段克制叙事，经 `validate_summary.py` 校验（固定 schema、长度门、禁诊断词、强制附「文本信号，非心理测评」），最后用 `+dashboard-block-update` 幂等改写顶部文本块。窗口证据不足时叙事会明说“样本不足、暂不概括趋势”。块集与 data_config 模板见 [仪表盘块集](skill/emotion-tide/references/dashboard-blocks.md)。
 
 六维雷达使用舒适度、精力、平静度、掌控感、连接感、清晰度六个字段。它表达文字中的相对信号，不能当作人格或心理测量。字段契约见 [输出 schema](skill/emotion-tide/references/output-schema.md)。
 
@@ -102,9 +108,12 @@ python3 -m unittest discover -s tests -v
 python3 skill/emotion-tide/scripts/validate_analysis.py examples/analysis.sample.json
 python3 skill/emotion-tide/scripts/render_dashboard.py --output /tmp/emotion-tide.svg < examples/analysis.sample.json
 python3 skill/emotion-tide/scripts/backfill_plan.py --config examples/config.backfill.sample.json --as-of 2026-02-20 --limit 5
+python3 skill/emotion-tide/scripts/summarize_window.py --window-days 14 < examples/base-window.sample.json \
+  | python3 -c "import sys;print(sys.stdin.read())"
+python3 skill/emotion-tide/scripts/validate_summary.py --emit markdown < examples/recap.sample.json
 ```
 
-示例数据完全虚构。测试覆盖：工作日/调休日门禁、多年日历解析、零消息语义、弱证据拒答、多余字段拒绝、本人 reaction 过滤与去标识聚合、季度盘点的排序/幂等去重/分批/日历完整性，以及 SVG 裁切和仪表盘雷达契约。
+示例数据完全虚构。测试覆盖：工作日/调休日门禁、多年日历解析、零消息语义、弱证据拒答、多余字段拒绝、本人 reaction 过滤与去标识聚合、季度盘点的排序/幂等去重/分批/日历完整性、最近总结的窗口聚合（去标识、趋势方向、按日期去重）与叙事校验（长度门、禁诊断词、Markdown 组装），以及 SVG 裁切和仪表盘雷达契约。
 
 ## 贡献原则
 

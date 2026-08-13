@@ -31,6 +31,8 @@ reactions = load_module("emotion_tide_reactions", SCRIPTS / "extract_reaction_si
 doctor = load_module("emotion_tide_doctor", SCRIPTS / "doctor.py")
 probe = load_module("emotion_tide_probe", SCRIPTS / "lark_identity_probe.py")
 backfill = load_module("emotion_tide_backfill", SCRIPTS / "backfill_plan.py")
+summarize = load_module("emotion_tide_summarize", SCRIPTS / "summarize_window.py")
+recap = load_module("emotion_tide_recap", SCRIPTS / "validate_summary.py")
 
 
 class AnalysisContractTests(unittest.TestCase):
@@ -425,6 +427,121 @@ class IdentityProbeTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["method"], "task_canary")
         self.assertEqual(result["identity_assurance"], "user_context")
+
+
+class SummarizeWindowTests(unittest.TestCase):
+    def rows(self) -> list[dict]:
+        # Ten dated rows: intensities rise across the window; two non-evidence days.
+        rows = []
+        for index in range(8):
+            rows.append({
+                "日期": f"2026-02-{index + 1:02d}",
+                "主情绪": "平稳" if index % 2 == 0 else "充实",
+                "情绪强度": 0.30 + index * 0.05,
+                "置信度": 0.60,
+                "覆盖状态": "complete",
+                "表情互动线索": "温暖连接",
+                "文本舒适度": 0.5,
+                "文本精力": 0.3,
+                "文本平静度": 0.6,
+                "文本掌控感": 0.5,
+                "文本连接感": 0.8,
+                "文本清晰度": 0.4,
+            })
+        rows.append({"日期": "2026-02-09", "主情绪": "无本人消息", "情绪强度": 0, "置信度": 0, "覆盖状态": "no_user_messages"})
+        rows.append({"日期": "2026-02-10", "主情绪": "无法判断", "情绪强度": 0.2, "置信度": 0.4, "覆盖状态": "partial"})
+        return rows
+
+    def test_window_counts_and_trend(self) -> None:
+        result = summarize.aggregate(summarize.iter_records(self.rows()), window_days=14)
+        self.assertEqual(result["total_days"], 10)
+        self.assertEqual(result["evidence_days"], 8)
+        self.assertEqual(result["no_message_days"], 1)
+        self.assertEqual(result["undetermined_days"], 1)
+        self.assertEqual(result["date_start"], "2026-02-01")
+        self.assertEqual(result["date_end"], "2026-02-10")
+        self.assertEqual(result["intensity_trend"], "rising")
+        self.assertIn(result["dominant_emotion"], {"平稳", "充实"})
+        self.assertEqual(result["dimension_high"]["name"], "连接感")
+        self.assertEqual(result["dimension_low"]["name"], "精力")
+
+    def test_window_limit_keeps_most_recent(self) -> None:
+        result = summarize.aggregate(summarize.iter_records(self.rows()), window_days=3)
+        self.assertEqual(result["total_days"], 3)
+        self.assertEqual(result["date_end"], "2026-02-10")
+        self.assertEqual(result["date_start"], "2026-02-08")
+
+    def test_dedupe_by_date_keeps_last(self) -> None:
+        rows = [
+            {"日期": "2026-02-01", "主情绪": "焦虑", "情绪强度": 0.9, "置信度": 0.6},
+            {"日期": "2026-02-01", "主情绪": "平稳", "情绪强度": 0.2, "置信度": 0.6},
+        ]
+        result = summarize.aggregate(summarize.iter_records(rows), window_days=14)
+        self.assertEqual(result["total_days"], 1)
+        self.assertEqual(result["emotion_distribution"], {"平稳": 1})
+
+    def test_reads_base_envelope_and_emits_no_text_or_ids(self) -> None:
+        envelope = {"data": {"items": [
+            {"record_id": "rec_secret", "fields": {"日期": "2026-02-02", "主情绪": "愉悦", "情绪强度": 0.5, "置信度": 0.7,
+                                                    "情绪摘要": "私密原文不应出现", "覆盖状态": "complete"}},
+        ]}}
+        result = summarize.aggregate(summarize.iter_records(envelope), window_days=14)
+        blob = json.dumps(result, ensure_ascii=False)
+        self.assertEqual(result["total_days"], 1)
+        self.assertNotIn("rec_secret", blob)
+        self.assertNotIn("私密原文", blob)
+
+    def test_empty_window_is_safe(self) -> None:
+        result = summarize.aggregate(summarize.iter_records([]), window_days=14)
+        self.assertEqual(result["total_days"], 0)
+        self.assertEqual(result["intensity_trend"], "insufficient")
+        self.assertIsNone(result["dominant_emotion"])
+
+
+class RecapValidatorTests(unittest.TestCase):
+    def sample(self) -> dict:
+        return {
+            "window_label": "近 14 个工作日",
+            "headline": "整体平稳，后半段强度略升。",
+            "narrative": ["有效记录 8 天，主导情绪偏平稳。", "连接感最高、精力最低。"],
+            "gentle_note": "这是文本线索，不是结论。",
+            "as_of": "2026-08-13",
+        }
+
+    def test_valid_recap_builds_markdown_with_disclaimer(self) -> None:
+        normalized = recap.validate(self.sample())
+        markdown = recap.to_markdown(normalized)
+        self.assertIn("# 最近总结 · 近 14 个工作日", markdown)
+        self.assertIn("1. 有效记录 8 天", markdown)
+        self.assertIn(recap.DISCLAIMER, markdown)
+        self.assertIn("更新于 2026-08-13", markdown)
+
+    def test_extra_fields_rejected(self) -> None:
+        payload = self.sample()
+        payload["raw_messages"] = ["leak"]
+        with self.assertRaisesRegex(ValueError, "unexpected fields"):
+            recap.validate(payload)
+
+    def test_narrative_length_bounds(self) -> None:
+        payload = self.sample()
+        payload["narrative"] = []
+        with self.assertRaisesRegex(ValueError, "narrative must contain"):
+            recap.validate(payload)
+        payload["narrative"] = ["a" * 61]
+        with self.assertRaisesRegex(ValueError, "narrative item exceeds"):
+            recap.validate(payload)
+
+    def test_diagnostic_language_blocked(self) -> None:
+        payload = self.sample()
+        payload["headline"] = "你可能有抑郁症"
+        with self.assertRaisesRegex(ValueError, "diagnostic language"):
+            recap.validate(payload)
+
+    def test_bad_date_rejected(self) -> None:
+        payload = self.sample()
+        payload["as_of"] = "2026/08/13"
+        with self.assertRaisesRegex(ValueError, "as_of must use"):
+            recap.validate(payload)
 
 
 if __name__ == "__main__":

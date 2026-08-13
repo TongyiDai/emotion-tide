@@ -14,7 +14,12 @@
     "url": null,
     "base_token": null,
     "table_id": null,
-    "dashboard_id": null
+    "dashboard_id": null,
+    "summary_block_id": null
+  },
+  "summary": {
+    "enabled": true,
+    "window_days": 14
   },
   "backfill": {
     "enabled": true,

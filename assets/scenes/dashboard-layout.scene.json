@@ -1,0 +1,18 @@
+{
+  "canvas": {"width": 1200, "height": 675, "ratio": "16:9", "background": "#FFFFFF"},
+  "intent": {"core_message": "仪表盘约 15 个组件，顶部放一个每天改写的克制总结，全部来自去标识化汇总字段。", "composition": "pinned-summary-over-grid", "focus_node": "summary"},
+  "style": {"accent_color": "#2F6BFF"},
+  "nodes": [
+    {"id": "summary", "type": "rect", "label": "最近总结（每日改写）", "importance": 5},
+    {"id": "cards", "type": "rect", "label": "指标卡 ×4", "importance": 3},
+    {"id": "trend", "type": "rect", "label": "趋势 ×4", "importance": 3},
+    {"id": "dist", "type": "rect", "label": "分布 ×4", "importance": 3},
+    {"id": "radar", "type": "rect", "label": "六维雷达", "importance": 3}
+  ],
+  "edges": [
+    {"from": "cards", "to": "summary", "style": "dashed"},
+    {"from": "trend", "to": "summary", "style": "dashed"},
+    {"from": "dist", "to": "summary", "style": "dashed"},
+    {"from": "radar", "to": "summary", "style": "dashed"}
+  ]
+}

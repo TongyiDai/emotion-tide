@@ -30,7 +30,9 @@ python3 scripts/doctor.py --live --allow-unprovisioned
 
 使用配置中的 profile 和 `--as user` 调用 `base +base-create`，名称为“情绪潮汐”，初始表名为“每日情绪”。字段必须来自 `output-schema.md`，包括机器汇总、六维文本信号、本人表情回应和用户自评字段。
 
-同一初始化流程继续创建仪表盘及组件：记录天数、平均置信度、情绪强度趋势、文字表达活跃度趋势、本人表情回应趋势、主情绪分布、六维状态轮廓和方法说明。雷达只使用六个文本状态字段。
+同一初始化流程继续创建仪表盘及组件，按 `dashboard-blocks.md`（块集 SSOT）尽量丰富地布置：置顶「最近总结」文本块（先放占位内容）与方法说明文本块；四张指标卡（记录天数、平均置信度、平均情绪强度、平均帮助程度）；趋势区（强度×置信度组合图、情绪强度趋势、文字表达活跃度、本人表情回应）；分布区（主情绪、覆盖质量、表情互动线索、用户校准）；六维状态轮廓雷达（只使用六个文本状态字段）；以及可选的辅助情绪词云。按顺序创建、不并行，全部创建后调用 `base +dashboard-arrange` 智能排布。所有图表只消费 `output-schema.md` 的既有字段，不新增 Base 字段。
+
+创建「最近总结」文本块时，记录其返回的 `block_id`，写入配置 `base.summary_block_id`，供每日 `+dashboard-block-update` 幂等改写。
 
 只使用本次创建调用返回的 Base token、table ID、dashboard ID。任何步骤失败都保留 `unprovisioned`，并向用户报告已创建但未完成的资源；禁止无界重试或静默创建第二套。
 
@@ -48,7 +50,7 @@ python3 scripts/doctor.py --live --allow-unprovisioned
 
 ### 5. 提交 ready
 
-把本次返回的 Base URL/token、table ID、dashboard ID 写入私有配置，将 `provisioning_state` 改为 `ready`。运行完整 doctor：
+把本次返回的 Base URL/token、table ID、dashboard ID 与「最近总结」文本块的 `summary_block_id` 写入私有配置，将 `provisioning_state` 改为 `ready`。运行完整 doctor：
 
 ```bash
 python3 scripts/doctor.py --live
@@ -58,7 +60,7 @@ python3 scripts/doctor.py --live
 
 ### 6. 季度盘点（开箱即用）
 
-`ready` 且 `text_processing_consent=true` 后，按 `references/quarterly-backfill.md` 回填过去约一个季度的工作日记录，让新 Base 一开始就有趋势可看。前置硬门槛：实时用户=owner=接收人、回填窗口所有年份的官方工作日日历齐全。回填复用每日流程的同一套读取、聚合、校验和按日期幂等 upsert，串行带退避、可断点续跑，逐日不出图、不通知。回填完成后再创建 17:50 自动化，并按当天做一次正常的当日回顾。
+`ready` 且 `text_processing_consent=true` 后，按 `references/quarterly-backfill.md` 回填过去约一个季度的工作日记录，让新 Base 一开始就有趋势可看。前置硬门槛：实时用户=owner=接收人、回填窗口所有年份的官方工作日日历齐全。回填复用每日流程的同一套读取、聚合、校验和按日期幂等 upsert，串行带退避、可断点续跑，逐日不出图、不通知。回填全部完成后，按 `references/dashboard-blocks.md` 构建一次顶部「最近总结」文本块（读回最近若干天汇总字段 → `summarize_window.py` → 模型叙事 → `validate_summary.py` → `+dashboard-block-update`），再创建 17:50 自动化，并按当天做一次正常的当日回顾。
 
 ## 重装与恢复
 
