@@ -100,13 +100,21 @@ python3 scripts/validate_analysis.py
 
 当最近 10 次中至少 3 次帮助程度 ≤2，或用户连续标记“不准确”，下一次只建议调整频率、关闭推断或暂停；不得以“坚持记录”为由继续打扰。
 
-### 5. Base 与仪表盘
+### 5. Base、仪表盘与顶部滚动总结
 
 按日期幂等 upsert 当天记录，回读后才通知。建议字段和映射见 `references/output-schema.md`。
 
 六维状态是文本估计：舒适度、精力、平静度、掌控感、连接感、清晰度。证据不足时全部留空。雷达图使用六个数字字段的 `AVERAGE`，按主情绪分组，标题为“六维状态轮廓”；图注必须写明“文本信号，不是心理测评”。
 
-仪表盘至少包含：记录天数、平均置信度、情绪强度趋势、文字表达活跃度趋势、本人表情回应趋势、主情绪分布、六维状态轮廓和方法说明。表情趋势单独展示，不并入雷达。只展示汇总字段。
+仪表盘按 `references/dashboard-blocks.md`（块集 SSOT）尽量丰富地展示：置顶「最近总结」文本块 + 方法说明；四张指标卡（记录天数、平均置信度、平均情绪强度、平均帮助程度）；趋势区（强度×置信度组合图、情绪强度趋势、文字表达活跃度、本人表情回应）；分布区（主情绪、覆盖质量、表情互动线索、用户校准）；六维状态轮廓雷达；以及可选的辅助情绪词云。所有图表只消费已写入的汇总字段，不新增 Base 字段、不含消息原文。表情趋势单独展示，不并入雷达。用户填写型字段（帮助程度、用户校准）初期偏空、随使用积累，属预期。
+
+**顶部「最近总结」每日改写**：每天 upsert 并回读当天记录后，用 `base +record-list`（按“日期”降序、只取汇总字段、约取 `summary.window_days` 个工作日）读回最近若干天，交 `scripts/summarize_window.py` 得到去标识化窗口聚合（只有数字与标签，无原文/ID）；模型据此写 `references/output-schema.md` 的 recap 叙事，经 `scripts/validate_summary.py --emit data-config` 校验并组装为文本块 Markdown，再用 `base +dashboard-block-update --block-id <base.summary_block_id>` 幂等改写。窗口有效证据不足时叙事须明说“样本不足、暂不概括趋势”。回填期不逐日改写，回填全部完成后构建一次。
+
+```bash
+lark-cli base +record-list --base-token <base_token> --table-id <table_id> --as user --json ... \
+  | python3 scripts/summarize_window.py --window-days 14
+python3 scripts/validate_summary.py --emit data-config < recap.json
+```
 
 ### 6. 图片与通知
 
@@ -151,6 +159,7 @@ python3 scripts/backfill_plan.py \
 
 - 首次独立 Base 初始化：`references/first-run-provisioning.md`
 - 开箱即用季度盘点：`references/quarterly-backfill.md`
+- 仪表盘块集与顶部总结：`references/dashboard-blocks.md`
 - 输出与字段：`references/output-schema.md`
 - 模型与证据：`references/model-selection.md`
 - 伦理与帮助边界：`references/safety-and-support.md`
