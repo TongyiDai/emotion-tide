@@ -1,5 +1,12 @@
 > “Humans should remain in control.” — [World Health Organization](https://www.who.int/news/item/28-06-2021-who-issues-first-global-report-on-artificial-intelligence-ai-in-health-and-six-guiding-principles-for-its-design-and-use)
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Agent%20Skill-agentskills.io-2F6BFF" alt="Agent Skill">
+  <img src="https://img.shields.io/badge/license-MIT-3fb950" alt="License MIT">
+  <img src="https://img.shields.io/badge/python-%3E%3D3.8-3572A5" alt="Python >=3.8">
+  <img src="https://img.shields.io/badge/works%20with-Codex%20|%20Claude%20|%20Cursor%20|%20TRAE-555" alt="Works with major agents">
+</p>
+
 # 情绪潮汐 Emotion Tide
 
 一个面向飞书用户的私密自助 Skill。它在工作日 17:50 回顾用户本人当天发送的消息，生成带置信度的文本情绪假设、一句暖心话和一个低负担行动，写入仅本人使用的多维表格，并发送当天摘要图片。首次建表时开箱即用：把过去约一个季度的消息按工作日逐日盘点、沉淀进 Base，让仪表盘一开始就有历史趋势可看。
