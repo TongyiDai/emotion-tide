@@ -1,6 +1,6 @@
 > “Humans should remain in control.” — [World Health Organization](https://www.who.int/news/item/28-06-2021-who-issues-first-global-report-on-artificial-intelligence-ai-in-health-and-six-guiding-principles-for-its-design-and-use)
 
-# 情绪潮汐 Emotion Tide
+<h1 align="center">情绪潮汐 Emotion Tide</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Agent%20Skill-agentskills.io-2F6BFF" alt="Agent Skill">
