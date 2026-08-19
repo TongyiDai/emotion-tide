@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">情绪潮汐多维表格仪表盘公开示例</title>
+  <desc id="desc">以完全虚构汇总数据展示情绪潮汐的私有 Base 仪表盘布局，包括指标、趋势、分布、六维状态轮廓和每日情绪表。</desc>
+  <defs>
+    <style>
+      .ui{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+      .title{font-size:28px;font-weight:700;fill:#1F1F1F}.sub{font-size:15px;fill:#777}.nav{font-size:15px;fill:#5A5A5A}.tab{font-size:16px;font-weight:650;fill:#266FE8}.label{font-size:15px;fill:#727272}.metric{font-size:34px;font-weight:700;fill:#242424}.small{font-size:13px;fill:#777}.cardtitle{font-size:18px;font-weight:650;fill:#303030}.axis{font-size:12px;fill:#8A8A8A}.tablehead{font-size:13px;font-weight:650;fill:#666}.cell{font-size:14px;fill:#353535}.badge{font-size:13px;font-weight:650}.watermark{font-size:13px;fill:#A0A0A0}
+    </style>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F7F8FA"/><stop offset="1" stop-color="#EEF4FF"/></linearGradient>
+    <clipPath id="table-clip"><rect x="70" y="764" width="1460" height="186" rx="12"/></clipPath>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1600" height="68" fill="#FFFFFF"/>
+  <path d="M0 68H1600" stroke="#E8E8E8"/>
+  <text class="ui nav" x="54" y="42">工作台</text><text class="ui nav" x="130" y="42">多维表格</text><text class="ui nav" x="235" y="42">个人空间</text>
+  <circle cx="1514" cy="34" r="16" fill="#DDEBFF"/><text class="ui badge" x="1508" y="39" fill="#266FE8">我</text>
+  <rect x="42" y="94" width="1516" height="860" rx="18" fill="#FFFFFF" stroke="#E6E6E6"/>
+  <text class="ui title" x="76" y="139">情绪潮汐 · 个人 Base</text>
+  <text class="ui sub" x="76" y="166">公开示例 · 所有数字与标签均为虚构</text>
+  <rect x="1350" y="117" width="158" height="34" rx="17" fill="#EEF5FF"/><text class="ui badge" x="1382" y="139" fill="#266FE8">仅本人可见</text>
+  <path d="M70 193H1530" stroke="#ECECEC"/>
+  <text class="ui tab" x="78" y="225">仪表盘</text><text class="ui nav" x="170" y="225">每日情绪</text><text class="ui nav" x="272" y="225">方法说明</text>
+  <path d="M70 238H1530" stroke="#ECECEC"/><path d="M74 238H135" stroke="#266FE8" stroke-width="3"/>
+
+  <g transform="translate(70 266)">
+    <rect width="330" height="118" rx="14" fill="#F7FAFF" stroke="#E6EFFD"/>
+    <text class="ui label" x="22" y="30">记录天数</text><text class="ui metric" x="22" y="76">16</text><text class="ui small" x="82" y="76">个工作日</text><text class="ui small" x="22" y="101">连续回顾，趋势开始成形</text>
+  </g>
+  <g transform="translate(418 266)">
+    <rect width="330" height="118" rx="14" fill="#F9F8FE" stroke="#EBE8FA"/>
+    <text class="ui label" x="22" y="30">平均置信度</text><text class="ui metric" x="22" y="76">68%</text><text class="ui small" x="22" y="101">只代表文本线索强弱</text>
+  </g>
+  <g transform="translate(766 266)">
+    <rect width="330" height="118" rx="14" fill="#FFF9F1" stroke="#F9EBD9"/>
+    <text class="ui label" x="22" y="30">平均情绪强度</text><text class="ui metric" x="22" y="76">57%</text><text class="ui small" x="22" y="101">没有好坏之分</text>
+  </g>
+  <g transform="translate(1114 266)">
+    <rect width="416" height="118" rx="14" fill="#F3FBF6" stroke="#DDEFE3"/>
+    <text class="ui label" x="22" y="30">最近总结</text><text class="ui cardtitle" x="22" y="62">样本仍少，先看见波动</text><text class="ui small" x="22" y="88">再由你决定它是否有意义</text>
+  </g>
+
+  <g transform="translate(70 414)">
+    <rect width="694" height="310" rx="14" fill="#FFFFFF" stroke="#E9E9E9"/>
+    <text class="ui cardtitle" x="24" y="34">情绪强度与文字表达</text><text class="ui small" x="24" y="57">按工作日 · 虚构示例</text>
+    <path d="M60 246H654M60 188H654M60 130H654M60 72H654" stroke="#F0F0F0"/>
+    <text class="ui axis" x="28" y="250">0</text><text class="ui axis" x="21" y="192">25</text><text class="ui axis" x="21" y="134">50</text><text class="ui axis" x="21" y="76">75</text>
+    <polyline points="60,190 145,142 230,162 315,116 400,132 485,84 570,122 654,96" fill="none" stroke="#3478E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="60,214 145,202 230,178 315,192 400,156 485,168 570,142 654,151" fill="none" stroke="#8BB5F4" stroke-width="3" stroke-dasharray="7 7" stroke-linecap="round"/>
+    <circle cx="654" cy="96" r="5" fill="#3478E5"/><circle cx="654" cy="151" r="5" fill="#8BB5F4"/>
+    <rect x="484" y="19" width="12" height="3" rx="2" fill="#3478E5"/><text class="ui axis" x="502" y="24">情绪强度</text><rect x="581" y="19" width="12" height="3" rx="2" fill="#8BB5F4"/><text class="ui axis" x="599" y="24">文字活跃度</text>
+    <text class="ui axis" x="55" y="274">周一</text><text class="ui axis" x="213" y="274">周三</text><text class="ui axis" x="370" y="274">周五</text><text class="ui axis" x="598" y="274">本周</text>
+  </g>
+
+  <g transform="translate(786 414)">
+    <rect width="360" height="310" rx="14" fill="#FFFFFF" stroke="#E9E9E9"/>
+    <text class="ui cardtitle" x="24" y="34">主情绪分布</text><text class="ui small" x="24" y="57">16 条已写入记录</text>
+    <text class="ui cell" x="24" y="106">充实</text><rect x="91" y="91" width="194" height="18" rx="9" fill="#EDF3FC"/><rect x="91" y="91" width="151" height="18" rx="9" fill="#4B86E8"/><text class="ui badge" x="299" y="106" fill="#4B86E8">7</text>
+    <text class="ui cell" x="24" y="151">平稳</text><rect x="91" y="136" width="194" height="18" rx="9" fill="#F2F5F8"/><rect x="91" y="136" width="108" height="18" rx="9" fill="#8CA3BE"/><text class="ui badge" x="299" y="151" fill="#627A96">5</text>
+    <text class="ui cell" x="24" y="196">疲惫</text><rect x="91" y="181" width="194" height="18" rx="9" fill="#FCF2EC"/><rect x="91" y="181" width="65" height="18" rx="9" fill="#D99572"/><text class="ui badge" x="299" y="196" fill="#B66B43">3</text>
+    <text class="ui cell" x="24" y="241">混合</text><rect x="91" y="226" width="194" height="18" rx="9" fill="#F6F4FB"/><rect x="91" y="226" width="22" height="18" rx="9" fill="#A68BD5"/><text class="ui badge" x="299" y="241" fill="#866BB7">1</text>
+    <text class="ui small" x="24" y="282">标签只是一种可被修正的文本假设</text>
+  </g>
+
+  <g transform="translate(1168 414)">
+    <rect width="362" height="310" rx="14" fill="#FFFFFF" stroke="#E9E9E9"/>
+    <text class="ui cardtitle" x="24" y="34">六维状态轮廓</text><text class="ui small" x="24" y="57">文本信号，非心理测评</text>
+    <g transform="translate(181 174)">
+      <polygon points="0,-93 80,-46 80,46 0,93 -80,46 -80,-46" fill="none" stroke="#E5EAF2"/>
+      <polygon points="0,-62 53,-31 53,31 0,62 -53,31 -53,-31" fill="none" stroke="#E5EAF2"/>
+      <polygon points="0,-31 27,-16 27,16 0,31 -27,16 -27,-16" fill="none" stroke="#E5EAF2"/>
+      <path d="M0-93V93M-80-46L80 46M80-46L-80 46" stroke="#E5EAF2"/>
+      <polygon points="0,-58 48,-28 57,33 0,61 -44,25 -52,-30" fill="#75A7F2" fill-opacity=".26" stroke="#3478E5" stroke-width="3"/>
+      <circle cx="0" cy="-58" r="3" fill="#3478E5"/><circle cx="48" cy="-28" r="3" fill="#3478E5"/><circle cx="57" cy="33" r="3" fill="#3478E5"/><circle cx="0" cy="61" r="3" fill="#3478E5"/><circle cx="-44" cy="25" r="3" fill="#3478E5"/><circle cx="-52" cy="-30" r="3" fill="#3478E5"/>
+      <text class="ui axis" x="-18" y="-106">舒适</text><text class="ui axis" x="87" y="-49">精力</text><text class="ui axis" x="87" y="54">平静</text><text class="ui axis" x="-24" y="113">掌控</text><text class="ui axis" x="-121" y="54">连接</text><text class="ui axis" x="-127" y="-49">清晰</text>
+    </g>
+  </g>
+
+  <text class="ui cardtitle" x="70" y="758">每日情绪</text><text class="ui watermark" x="1516" y="758" text-anchor="end">公开示例，不含任何真实消息或个人数据</text>
+  <g clip-path="url(#table-clip)">
+    <rect x="70" y="764" width="1460" height="186" rx="12" fill="#FFFFFF" stroke="#E7E7E7"/>
+    <rect x="70" y="764" width="1460" height="40" fill="#F8F9FB"/>
+    <path d="M272 764V950M484 764V950M688 764V950M865 764V950M1065 764V950M1264 764V950M1430 764V950" stroke="#ECECEC"/>
+    <path d="M70 804H1530M70 840H1530M70 876H1530M70 912H1530" stroke="#F0F0F0"/>
+    <text class="ui tablehead" x="90" y="789">日期</text><text class="ui tablehead" x="292" y="789">主情绪</text><text class="ui tablehead" x="504" y="789">强度</text><text class="ui tablehead" x="708" y="789">置信度</text><text class="ui tablehead" x="885" y="789">文字表达</text><text class="ui tablehead" x="1085" y="789">本人表情回应</text><text class="ui tablehead" x="1284" y="789">用户校准</text><text class="ui tablehead" x="1450" y="789">备注</text>
+    <text class="ui cell" x="90" y="828">2026-08-12</text><rect x="292" y="812" width="50" height="21" rx="10" fill="#EAF3FF"/><text class="ui badge" x="304" y="827" fill="#3478E5">充实</text><text class="ui cell" x="504" y="828">66%</text><text class="ui cell" x="708" y="828">72%</text><text class="ui cell" x="885" y="828">18 条</text><text class="ui cell" x="1085" y="828">6</text><text class="ui small" x="1284" y="828">待填写</text><text class="ui small" x="1450" y="828">—</text>
+    <text class="ui cell" x="90" y="864">2026-08-11</text><rect x="292" y="848" width="50" height="21" rx="10" fill="#F0F3F7"/><text class="ui badge" x="304" y="863" fill="#66798E">平稳</text><text class="ui cell" x="504" y="864">48%</text><text class="ui cell" x="708" y="864">64%</text><text class="ui cell" x="885" y="864">12 条</text><text class="ui cell" x="1085" y="864">4</text><text class="ui small" x="1284" y="864">待填写</text><text class="ui small" x="1450" y="864">—</text>
+    <text class="ui cell" x="90" y="900">2026-08-08</text><rect x="292" y="884" width="50" height="21" rx="10" fill="#FFF1E8"/><text class="ui badge" x="304" y="899" fill="#B56A40">疲惫</text><text class="ui cell" x="504" y="900">59%</text><text class="ui cell" x="708" y="900">61%</text><text class="ui cell" x="885" y="900">9 条</text><text class="ui cell" x="1085" y="900">2</text><text class="ui small" x="1284" y="900">待填写</text><text class="ui small" x="1450" y="900">—</text>
+  </g>
+</svg>

@@ -33,6 +33,12 @@
 
 定时运行必须由宿主绑定回这条对话，并提供 `present_files`。缺少其中任一能力时，Skill 会停止卡片交付并标记 `conversation_delivery_unavailable`，不会把结果改投飞书。完整约束见[对话投递](skill/emotion-tide/references/conversation-delivery.md)。
 
+<p align="center">
+  <img src="assets/screenshots/daily-card-example.png" alt="当天情绪回顾卡片的虚构示例" width="100%" />
+</p>
+
+当天卡片使用已校验汇总字段渲染，长文本会换行、省略并裁切在卡片内。上图来自仓库内的虚构样例，不含真实消息、人员、聊天或私有配置。
+
 ## 开箱即用：过去一个季度的工作日盘点
 
 新建的 Base 是空的，只有连续多天运行才积累出趋势。为让仪表盘开箱即用，初始化通过后立即回填过去约一个季度（默认 90 天）的**工作日**记录：跳过周末与节假日，对每个工作日复用与每日流程完全相同的读取、去标识化、schema 校验和按日期幂等 upsert。回填不是一条新的分析路径，只是把“分析一天”按官方日历倒着补齐历史工作日。
@@ -85,6 +91,12 @@ python3 ~/.codex/skills/emotion-tide/scripts/doctor.py --live --allow-unprovisio
 ## 多维表格与仪表盘
 
 Base 保存日期、汇总标签、证据计数、本人表情回应、六维文本信号和用户自愿反馈，不保存消息原文。仪表盘尽量丰富地展示（约 15 个组件）：置顶「最近总结」文本块与方法说明；四张指标卡（记录天数、平均置信度、平均情绪强度、平均帮助程度）；趋势区（强度×置信度组合图、情绪强度趋势、文字表达活跃度、本人表情回应）；分布区（主情绪、覆盖质量、表情互动线索、用户校准）；六维状态轮廓雷达；可选的辅助情绪词云。所有图表只消费已写入的汇总字段，**不新增 Base 字段、不含消息原文**。
+
+<p align="center">
+  <img src="assets/screenshots/bitable-dashboard-example.png" alt="情绪潮汐多维表格仪表盘与每日情绪表的虚构示例" width="100%" />
+</p>
+
+这是与实际字段和组件结构一致的公开预览：记录、趋势、本人表情回应、六维状态轮廓和用户校准都在同一张 Base 内；数值、日期和情绪标签全部虚构，因此它展示结构，不公开任何人的状态。
 
 <p align="center">
   <img src="assets/boards/dashboard-layout.svg" alt="约 15 个组件的仪表盘布局与每日改写的顶部总结" width="100%" />
