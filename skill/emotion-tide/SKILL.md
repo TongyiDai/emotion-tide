@@ -1,13 +1,13 @@
 ---
 name: emotion-tide
-description: "通过飞书 CLI 读取当前用户本人在指定工作日时间窗内发送的消息，生成带不确定性说明的私密情绪回顾、微小支持行动、当天图片和个人 Base 趋势仪表盘。首次创建多维表格时开箱即用地把过去约一个季度的消息按工作日盘点、沉淀进 Base。用户提到情绪潮汐、每日情绪回顾、根据本人飞书消息整理状态、情绪日记或个人情绪趋势时使用。仅限本人自愿自助，不得用于员工监控、HR 判断、绩效、招聘、教育评估或第三方画像。"
+description: "通过飞书 CLI 读取当前用户本人在指定工作日时间窗内发送的消息，生成带不确定性说明的私密情绪回顾、微小支持行动、当前 Agent 对话中的当天图片和个人 Base 趋势仪表盘。首次创建多维表格时开箱即用地把过去约一个季度的消息按工作日盘点、沉淀进 Base。用户提到情绪潮汐、每日情绪回顾、根据本人飞书消息整理状态、情绪日记或个人情绪趋势时使用。仅限本人自愿自助，不得用于员工监控、HR 判断、绩效、招聘、教育评估或第三方画像。"
 ---
 
 # 情绪潮汐
 
 ## 定位
 
-把用户本人当天发送的文字变成一份可质疑、可修正的私人回顾。模型输出是“文本线索假设”，用户自评拥有最终解释权。本 Skill 不提供诊断、治疗、心理测评或危机预测。
+把用户本人当天发送的文字变成一份可质疑、可修正的私人回顾。模型输出是“文本线索假设”，用户自评拥有最终解释权。本 Skill 不提供诊断、治疗、心理测评或危机预测。当天卡片和简短回顾只交付到创建自动化的当前 Agent 对话。
 
 ## 首次运行
 
@@ -17,10 +17,10 @@ description: "通过飞书 CLI 读取当前用户本人在指定工作日时间�
 2. 明确告知用户文本处理位置：`agent_runtime` 可能把消息文本发送给当前模型提供方；`local_only` 仅允许已配置的本地模型。首次运行必须取得同意并写入 `text_processing_consent=true`。未同意就停止。
 3. 填入用户选择的 `lark_profile`，运行 `python3 scripts/doctor.py --live --allow-unprovisioned`。支持 `auth status --json --verify` 的环境必须确认 `identity=user`、`verified=true`；当前 CLI 构建若没有 `auth` 子命令，可退回 `contact +get-user --as user` 解析当前用户。仅 `task +get-my-tasks` 这种 user-context canary 不足以创建或绑定私有 Base。
 4. 生成本地随机 `installation_id`，使用刚验证的用户身份创建全新的个人 Base、唯一初始表和仪表盘。把实时返回的 owner ID、Base URL/token、table ID、dashboard ID 写入该用户私有配置；不得从 README、示例配置、环境变量或现有同名 Base 猜测这些值。
-5. 创建后回读 Base owner，要求 `owner_user_id == recipient_user_id == 当前验证用户 ID`；再核验只有当前用户这一名协作者，关闭链接分享和组织外分享能力。任何一项无法证明时保持 `unprovisioned`，不创建自动化，不声称“仅本人可见”。
+5. 创建后回读 Base owner，要求 `owner_user_id == recipient_user_id == 当前验证用户 ID`；`recipient_user_id` 是历史配置中的身份绑定字段，不再是消息接收目标。再核验只有当前用户这一名协作者，关闭链接分享和组织外分享能力。任何一项无法证明时保持 `unprovisioned`，不创建自动化，不声称“仅本人可见”。
 6. 全部回读通过后才把 `provisioning_state` 改为 `ready`，再运行 `python3 scripts/doctor.py --live`。doctor 必须实际读取 Base；缺少显式状态、安装 ID 或 owner 时不得推断就绪。重复安装时只有 `ready` 配置、owner 匹配且 Base 可读才允许复用；配置缺失时不得按标题搜索并接管现有 Base。
 7. 配置当年官方工作日表。没有可核验的当年日历时，工作日门禁返回 `unknown` 并静默退出。回填会回看约一个季度，可能跨年，因此还要配置回填窗口涉及的其他年份日历（`workday_calendar.years`）。
-8. 开箱即用的季度盘点：初始化全部回读通过、`text_processing_consent=true`、且回填窗口的日历完整后，立即按 `references/quarterly-backfill.md` 把过去约一个季度的工作日逐日盘点、幂等写入 Base，让仪表盘一开始就有历史趋势可看。回填串行推进、可断点续跑，逐日不发通知、不出图。回填完成后再创建 17:50 自动化，并按当天做一次正常的当日回顾。
+8. 开箱即用的季度盘点：初始化全部回读通过、`text_processing_consent=true`、且回填窗口的日历完整后，立即按 `references/quarterly-backfill.md` 把过去约一个季度的工作日逐日盘点、幂等写入 Base，让仪表盘一开始就有历史趋势可看。回填串行推进、可断点续跑，逐日不出图、不进行对话投递。回填完成后才创建绑定到本次对话的 17:50 自动化，并按当天做一次正常的当日回顾。
 
 ## 每次运行
 
@@ -33,7 +33,7 @@ python3 scripts/workday_gate.py --config "$EMOTION_TIDE_CONFIG" --date YYYY-MM-D
 ```
 
 - `workday`：继续。
-- `non_workday`：静默结束，不认证、不读消息、不调用模型、不写 Base、不通知。
+- `non_workday`：静默结束，不认证、不读消息、不调用模型、不写 Base、不交付对话卡片。
 - `unknown`：静默结束并在任务内标记 `workday_calendar_unavailable`。
 
 ### 1. 读取范围
@@ -68,7 +68,7 @@ python3 scripts/extract_reaction_signals.py \
 
 运行时模型必须输出 `references/output-schema.md` 的 JSON。先逐条识别文本线索，再按时间顺序汇总；明确自述权重高，工作套话、讽刺、转发和单句“收到”权重低。
 
-硬门槛：本人消息少于 3 条、有效字符少于 100、置信度低于 0.55，或覆盖不完整且冲突明显时，主情绪只能是“无法判断/混合”，六维状态全部为 `null`。表情不能单独跨过文字证据门，也不能覆盖明确的第一人称自述。没有本人消息时使用“无本人消息”、置信度 0；配置默认 `notify_on_no_evidence=false`，因此不发通知。
+硬门槛：本人消息少于 3 条、有效字符少于 100、置信度低于 0.55，或覆盖不完整且冲突明显时，主情绪只能是“无法判断/混合”，六维状态全部为 `null`。表情不能单独跨过文字证据门，也不能覆盖明确的第一人称自述。没有本人消息时使用“无本人消息”、置信度 0；为兼容现有配置，`notify_on_no_evidence=false` 表示不在对话中交付当天卡片或文字回顾。
 
 表情只作为低权重互动线索，最高占综合判断的 15%：
 
@@ -86,9 +86,9 @@ python3 scripts/validate_analysis.py
 
 校验失败时最多重试一次；仍失败就停止外部写入，不能自由补字段。
 
-### 4. 真正有帮助的输出
+### 4. 真正有帮助的对话内回顾
 
-通知按以下顺序组织：
+当天回顾在当前 Agent 对话中按以下顺序组织：
 
 1. “文本线索估计”：主情绪、置信度和覆盖边界；避免“你今天就是……”。
 2. 一句观察：只写语义概括。
@@ -102,7 +102,7 @@ python3 scripts/validate_analysis.py
 
 ### 5. Base、仪表盘与顶部滚动总结
 
-按日期幂等 upsert 当天记录，回读后才通知。建议字段和映射见 `references/output-schema.md`。
+按日期幂等 upsert 当天记录，回读后才交付。建议字段和映射见 `references/output-schema.md`。
 
 六维状态是文本估计：舒适度、精力、平静度、掌控感、连接感、清晰度。证据不足时全部留空。雷达图使用六个数字字段的 `AVERAGE`，按主情绪分组，标题为“六维状态轮廓”；图注必须写明“文本信号，不是心理测评”。
 
@@ -116,17 +116,17 @@ lark-cli base +record-list --base-token <base_token> --table-id <table_id> --as 
 python3 scripts/validate_summary.py --emit data-config < recap.json
 ```
 
-### 6. 图片与通知
+### 6. 图片与对话交付
 
-用已校验 JSON 运行 `scripts/render_dashboard.py` 输出 SVG，再转为 PNG。渲染器按东亚字符宽度换行、超长文本省略，并用裁切边界防止溢出。临时文件放 `mktemp -d`，发送后清理。
+用已校验 JSON 运行 `scripts/render_dashboard.py` 输出 SVG，再转为 PNG。渲染器按东亚字符宽度换行、超长文本省略，并用裁切边界防止溢出。临时文件放 `mktemp -d`。
 
-先发送 PNG，再发送短文字和 Base 入口；图片与文字使用不同的日期幂等 key。图片失败时发文字并标记 `visual_notification_failed`；文字失败时保留已回读记录并标记 `notification_failed`。
+Base 当天记录回读成功后，必须由宿主对话的 `present_files` 能力把 PNG 贴到创建该自动化的当前对话；短文字也只写在同一对话。不得通过 `lark-cli im` 发送图片、文字、链接或任何替代私聊。宿主无法把定时任务绑定回原对话，或不提供 `present_files` 时，标记 `conversation_delivery_unavailable` 并停止交付，绝不降级到飞书消息。`present_files` 返回成功或失败后才清理临时目录。完整顺序、失败口径和自动化前置条件见 `references/conversation-delivery.md`。
 
 ## 首次运行的季度盘点
 
 初始化后 Base 是空的，只有连续多天运行才积累出趋势。为让仪表盘开箱即用，`ready` 后立即回填过去约一个季度的工作日记录。完整流程与安全边界见 `references/quarterly-backfill.md`，要点：
 
-- 前置硬门槛：`ready` + 完整 doctor 通过、实时用户=owner=接收人、`text_processing_consent=true`、回填窗口所有年份日历齐全。
+- 前置硬门槛：`ready` + 完整 doctor 通过、实时用户=Base owner=配置中的身份绑定字段、`text_processing_consent=true`、回填窗口所有年份日历齐全。
 - 先读 Base “日期”列拿到已存在日期写入临时文件，再规划（不联网、不读消息）：
 
 ```bash
@@ -139,7 +139,7 @@ python3 scripts/backfill_plan.py \
 ```
 
 - 对 `pending`（从旧到新）逐日执行与“每次运行”完全相同的读取、聚合、生成、校验、幂等 upsert；串行带退避，避免 Base 写入限流。
-- 回填期默认不逐日出图、不逐日通知（`backfill.render_per_day`、`notify_per_day` 均为 `false`）；历史日不追溯触发危机干预，命中只在汇报里说明。
+- 回填期默认不逐日出图、不逐日进行对话交付（`backfill.render_per_day`、`notify_per_day` 均为 `false`）；历史日不追溯触发危机干预，命中只在汇报里说明。
 - 按 `--limit` 分批推进，`backfill.last_completed_date` 支持断点续跑；`remaining_after_limit>0` 时提示用户可再次运行继续。回填完成后再进入常规每日流程。
 
 ## 安全边界
@@ -164,3 +164,4 @@ python3 scripts/backfill_plan.py \
 - 模型与证据：`references/model-selection.md`
 - 伦理与帮助边界：`references/safety-and-support.md`
 - 图片卡片：`references/dashboard-card.md`
+- 对话卡片投递：`references/conversation-delivery.md`
