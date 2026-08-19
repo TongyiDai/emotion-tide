@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<defs>
+<clipPath id="date-clip"><rect x="920" y="64" width="198" height="42"/></clipPath>
+<clipPath id="emotion-clip"><rect x="106" y="248" width="360" height="114"/></clipPath>
+<clipPath id="state-clip"><rect x="106" y="502" width="360" height="112"/></clipPath>
+<clipPath id="summary-clip"><rect x="554" y="238" width="540" height="126"/></clipPath>
+<clipPath id="evidence-clip"><rect x="550" y="470" width="224" height="126"/></clipPath>
+<clipPath id="confidence-clip"><rect x="858" y="470" width="224" height="112"/></clipPath>
+<clipPath id="footer-clip"><rect x="82" y="634" width="1036" height="44"/></clipPath>
+</defs>
+<rect width="1200" height="720" fill="#F6EBD8"/>
+<rect x="40" y="36" width="1120" height="648" rx="28" fill="#FFFDF8" stroke="#0B0A09" stroke-width="2"/>
+<text x="82" y="96" font-family="PingFang SC, STHeiti, sans-serif" font-size="34" font-weight="700" fill="#0B0A09">情绪潮汐</text>
+<text x="82" y="130" font-family="PingFang SC, STHeiti, sans-serif" font-size="18" font-weight="400" fill="#605B52">基于本人当天消息的克制回顾</text>
+<text x="934" y="96" font-family="PingFang SC, STHeiti, sans-serif" font-size="20" font-weight="600" fill="#0B0A09" clip-path="url(#date-clip)">2026-08-12</text>
+<line x1="82" y1="154" x2="1118" y2="154" stroke="#0B0A09" stroke-opacity="0.18"/>
+<rect x="82" y="184" width="420" height="228" rx="22" fill="#F4EEE2"/>
+<text x="116" y="228" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="500" fill="#605B52">当日主情绪</text>
+<text x="116" y="304" font-family="PingFang SC, STHeiti, sans-serif" font-size="54" font-weight="700" fill="#607D5A" clip-path="url(#emotion-clip)">充实</text>
+<text x="116" y="340" font-family="PingFang SC, STHeiti, sans-serif" font-size="18" font-weight="400" fill="#403B35" clip-path="url(#emotion-clip)">辅助情绪：疲惫</text>
+<rect x="82" y="442" width="420" height="184" rx="22" fill="#F4EEE2"/>
+<text x="116" y="486" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="500" fill="#605B52">状态刻度</text>
+<text x="116" y="530" font-family="PingFang SC, STHeiti, sans-serif" font-size="21" font-weight="600" fill="#0B0A09" clip-path="url(#state-clip)">情绪强度  66%</text>
+<rect x="116" y="548" width="348" height="14" rx="7" fill="#DDD5C7"/>
+<rect x="116" y="548" width="229.7" height="14" rx="7" fill="#607D5A"/>
+<text x="116" y="604" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="400" fill="#403B35" clip-path="url(#state-clip)">覆盖：覆盖完整</text>
+<rect x="532" y="184" width="586" height="202" rx="22" fill="#F4EEE2"/>
+<text x="568" y="228" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="500" fill="#605B52">今日观察</text>
+<text x="568" y="278" font-family="PingFang SC, STHeiti, sans-serif" font-size="25" font-weight="500" fill="#0B0A09" clip-path="url(#summary-clip)">今天的文字里有持续推进事情的力量</text>
+<text x="568" y="313" font-family="PingFang SC, STHeiti, sans-serif" font-size="25" font-weight="500" fill="#0B0A09" clip-path="url(#summary-clip)">，傍晚也出现了需要收尾和休息的信</text>
+<text x="568" y="348" font-family="PingFang SC, STHeiti, sans-serif" font-size="25" font-weight="500" fill="#0B0A09" clip-path="url(#summary-clip)">号。</text>
+<rect x="532" y="416" width="278" height="210" rx="22" fill="#F4EEE2"/>
+<text x="566" y="460" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="500" fill="#605B52">消息与证据</text>
+<text x="566" y="520" font-family="PingFang SC, STHeiti, sans-serif" font-size="46" font-weight="700" fill="#0B0A09" clip-path="url(#evidence-clip)">18</text>
+<text x="566" y="550" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="400" fill="#403B35" clip-path="url(#evidence-clip)">条本人消息</text>
+<text x="566" y="588" font-family="PingFang SC, STHeiti, sans-serif" font-size="18" font-weight="400" fill="#403B35" clip-path="url(#evidence-clip)">有效文本：11</text>
+<rect x="840" y="416" width="278" height="210" rx="22" fill="#EEE4D4"/>
+<text x="874" y="460" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="500" fill="#605B52">分析可信度</text>
+<text x="874" y="520" font-family="PingFang SC, STHeiti, sans-serif" font-size="46" font-weight="700" fill="#607D5A" clip-path="url(#confidence-clip)">72%</text>
+<text x="874" y="566" font-family="PingFang SC, STHeiti, sans-serif" font-size="17" font-weight="400" fill="#403B35" clip-path="url(#confidence-clip)">仅代表文本线索强弱</text>
+<text x="82" y="654" font-family="PingFang SC, STHeiti, sans-serif" font-size="16" font-weight="500" fill="#403B35" clip-path="url(#footer-clip)">已经做完的部分值得被看见，今晚可以少扛一点。</text>
+</svg>
