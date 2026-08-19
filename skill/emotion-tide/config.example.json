@@ -15,7 +15,9 @@
     "base_token": null,
     "table_id": null,
     "dashboard_id": null,
-    "summary_block_id": null
+    "summary_block_id": null,
+    "recovery_label": null,
+    "provisioning_started_at": null
   },
   "summary": {
     "enabled": true,

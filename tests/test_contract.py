@@ -33,6 +33,7 @@ probe = load_module("emotion_tide_probe", SCRIPTS / "lark_identity_probe.py")
 backfill = load_module("emotion_tide_backfill", SCRIPTS / "backfill_plan.py")
 summarize = load_module("emotion_tide_summarize", SCRIPTS / "summarize_window.py")
 recap = load_module("emotion_tide_recap", SCRIPTS / "validate_summary.py")
+checkpoint = load_module("emotion_tide_checkpoint", SCRIPTS / "provisioning_checkpoint.py")
 
 
 class AnalysisContractTests(unittest.TestCase):
@@ -326,6 +327,73 @@ class ProvisioningTests(unittest.TestCase):
         self.assertIsNone(config["owner_user_id"])
         self.assertIsNone(config["recipient_user_id"])
         self.assertTrue(all(value is None for value in config["base"].values()))
+
+    def prepared_config(self) -> dict:
+        config = self.example()
+        config.update({
+            "installation_id": "install_a",
+            "lark_profile": "personal",
+            "text_processing_consent": True,
+            "owner_user_id": "user_a",
+            "recipient_user_id": "user_a",
+        })
+        return config
+
+    def test_checkpoint_prepares_stable_installation_specific_name(self) -> None:
+        config = self.prepared_config()
+        now = checkpoint.dt.datetime(2026, 8, 19, 9, tzinfo=checkpoint.dt.timezone.utc)
+        label = checkpoint.prepare(config, now=now)
+        self.assertEqual(label, checkpoint.base_name("install_a"))
+        self.assertEqual(config["base"]["recovery_label"], label)
+        self.assertEqual(config["base"]["provisioning_started_at"], "2026-08-19T09:00:00Z")
+
+    def test_checkpoint_binds_only_expected_user_create_envelope(self) -> None:
+        config = self.prepared_config()
+        checkpoint.prepare(config, now=checkpoint.utc_now())
+        payload = {
+            "ok": True,
+            "identity": "user",
+            "data": {
+                "base": {"name": checkpoint.base_name("install_a"), "app_token": "base_created_for_current_user", "url": "https://example.invalid/base/current"},
+                "table": {"table_id": "table_created_for_current_user"},
+            },
+        }
+        checkpoint.bind(config, payload)
+        self.assertEqual(config["provisioning_state"], "unprovisioned")
+        self.assertEqual(config["base"]["base_token"], "base_created_for_current_user")
+        with self.assertRaisesRegex(ValueError, "already exist"):
+            checkpoint.bind(config, payload)
+
+    def test_checkpoint_cli_never_echoes_create_coordinates(self) -> None:
+        config = self.prepared_config()
+        checkpoint.prepare(config, now=checkpoint.utc_now())
+        payload = {
+            "ok": True,
+            "identity": "user",
+            "data": {
+                "base": {"app_token": "base_private_coordinate", "url": "https://example.invalid/base/private"},
+                "table": {"table_id": "table_private_coordinate"},
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = Path(directory) / "config.json"
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(SCRIPTS / "provisioning_checkpoint.py"), "bind", "--config", str(config_path)],
+                input=json.dumps(payload), text=True, capture_output=True, check=False,
+            )
+            self.assertEqual(result.returncode, 0)
+            self.assertNotIn("base_private_coordinate", result.stdout)
+            self.assertNotIn("table_private_coordinate", result.stdout)
+            self.assertTrue(json.loads(result.stdout)["coordinates_bound"])
+
+    def test_recovery_is_short_lived_and_never_uses_a_plain_title(self) -> None:
+        config = self.prepared_config()
+        started = checkpoint.dt.datetime(2026, 8, 19, 9, tzinfo=checkpoint.dt.timezone.utc)
+        label = checkpoint.prepare(config, now=started)
+        self.assertEqual(checkpoint.recovery_plan(config, now=started + checkpoint.dt.timedelta(minutes=59), max_age_minutes=60), label)
+        with self.assertRaisesRegex(ValueError, "closed"):
+            checkpoint.recovery_plan(config, now=started + checkpoint.dt.timedelta(minutes=61), max_age_minutes=60)
 
     def test_unprovisioned_config_is_only_allowed_in_bootstrap_mode(self) -> None:
         config = self.example()
