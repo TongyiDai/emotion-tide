@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/works%20with-Codex%20|%20Claude%20|%20Cursor%20|%20TRAE-555" alt="Works with major agents">
 </p>
 
-一个面向飞书用户的私密自助 Skill。它在工作日 17:50 回顾用户本人当天发送的消息，生成带置信度的文本情绪假设、一句暖心话和一个低负担行动，写入仅本人使用的多维表格，并发送当天摘要图片。首次建表时开箱即用：把过去约一个季度的消息按工作日逐日盘点、沉淀进 Base，让仪表盘一开始就有历史趋势可看。
+一个面向飞书用户的私密自助 Skill。它在工作日 17:50 回顾用户本人当天发送的消息，生成带置信度的文本情绪假设、一句暖心话和一个低负担行动，写入仅本人使用的多维表格，并把当天摘要图片贴到启动自动化的 Agent 对话。首次建表时开箱即用：把过去约一个季度的消息按工作日逐日盘点、沉淀进 Base，让仪表盘一开始就有历史趋势可看。
 
 它处于 Beta，提供自我觉察辅助，不提供心理诊断、治疗、测评或危机预测。用户自评拥有最终解释权。
 
@@ -19,13 +19,19 @@
 
 ## 它解决什么
 
-- 只读取当前用户本人发送的消息，只把结果发给本人。
+- 只读取当前用户本人发送的消息，只在同一用户的 Agent 对话中交付结果。
 - 非工作日静默跳过；调休工作日按官方日历执行。
 - 消息原文只存在于运行时，不写入 Base、图片、日志或仓库。
 - 输出主情绪、强度、置信度与六维文本状态；证据不足时拒绝判断。
 - 识别本人主动添加的飞书消息表情；事务点赞只计互动，不直接等于愉悦。
 - Base 仪表盘包含趋势、分布和六维雷达图。当天 PNG 保持轻量，不重复雷达。
 - 用户可以校准“准确/部分准确/不准确”，选择支持偏好，或随时暂停。
+
+## 投递渠道
+
+每天的 PNG 卡片与简短回顾只出现在创建自动化的 Agent 对话中。Skill 不会通过飞书私聊、群消息或机器人发送图片、文字、链接或提醒；飞书 CLI 只承担消息读取与用户私有 Base 的读写。
+
+定时运行必须由宿主绑定回这条对话，并提供 `present_files`。缺少其中任一能力时，Skill 会停止卡片交付并标记 `conversation_delivery_unavailable`，不会把结果改投飞书。完整约束见[对话投递](skill/emotion-tide/references/conversation-delivery.md)。
 
 ## 开箱即用：过去一个季度的工作日盘点
 
@@ -35,7 +41,7 @@
   <img src="assets/boards/quarterly-backfill.svg" alt="首次建表即按工作日回填过去一个季度，可断点续跑" width="100%" />
 </p>
 
-回填串行推进并对 Base 写入限流做退避，通过 `--limit` 分批；`last_completed_date` 让被限额或中断打断后可从下一天续跑。季度窗口可能跨年，因此工作日日历支持多年配置（`workday_calendar.years`），窗口内任一年份缺日历时会标记为不完整并要求先补齐，不猜测工作日状态。回填期不逐日出图、不逐日通知，历史日不追溯触发危机干预；完成后再进入常规每日流程。完整流程见 [季度盘点](skill/emotion-tide/references/quarterly-backfill.md)。
+回填串行推进并对 Base 写入限流做退避，通过 `--limit` 分批；`last_completed_date` 让被限额或中断打断后可从下一天续跑。季度窗口可能跨年，因此工作日日历支持多年配置（`workday_calendar.years`），窗口内任一年份缺日历时会标记为不完整并要求先补齐，不猜测工作日状态。回填期不逐日出图、不逐日进行对话交付，历史日不追溯触发危机干预；完成后再进入常规每日流程。完整流程见 [季度盘点](skill/emotion-tide/references/quarterly-backfill.md)。
 
 ## 可靠性边界
 
@@ -51,7 +57,7 @@
 
 ## 安装
 
-依赖：Python 3.9+、已完成用户身份授权的 `lark-cli`、Codex/Agent Skill 运行环境，以及可用的 SVG 转 PNG 工具。
+依赖：Python 3.9+、已完成用户身份授权的 `lark-cli`、能把定时任务绑定回当前对话且提供 `present_files` 的 Agent 运行环境，以及可用的 SVG 转 PNG 工具。
 
 ```bash
 git clone https://github.com/TongyiDai/emotion-tide.git
@@ -61,7 +67,7 @@ cp emotion-tide/skill/emotion-tide/config.example.json ~/.config/emotion-tide/co
 chmod 600 ~/.config/emotion-tide/config.json
 ```
 
-首次启用时不要填写或复用任何现成 Base token。Agent 先生成 `installation_id`、取得文本处理同意，并把配置 profile 的实时 open_id 同时绑定为 owner 与接收人，再运行初始化检查并创建全新的 Base：
+首次启用时不要填写或复用任何现成 Base token。Agent 先生成 `installation_id`、取得文本处理同意，并把配置 profile 的实时 open_id 同时绑定为 owner 与历史身份字段；该字段只做归属校验，不再接收飞书消息。随后运行初始化检查并创建全新的 Base：
 
 ```bash
 export EMOTION_TIDE_CONFIG="$HOME/.config/emotion-tide/config.json"
@@ -70,9 +76,9 @@ python3 ~/.codex/skills/emotion-tide/scripts/doctor.py --live --allow-unprovisio
 
 首次对话可直接说：
 
-> 请帮我安装“情绪潮汐”：这是我的首次使用，请在我当前验证通过的飞书用户身份下新建一套只属于我的 Base、数据表和含六维雷达图的仪表盘；不要复用维护者、仓库示例、其他用户或同名 Base 的任何 token；回读 owner 和权限后再创建工作日 17:50 自动化。只分析我本人当天发送的消息，非工作日静默跳过；先告诉我消息会在哪里处理，并等我同意后再启用。
+> 请帮我安装“情绪潮汐”：这是我的首次使用，请在我当前验证通过的飞书用户身份下新建一套只属于我的 Base、数据表和含六维雷达图的仪表盘；不要复用维护者、仓库示例、其他用户或同名 Base 的任何 token；回读 owner 和权限后，只在本对话支持定时回贴和 `present_files` 时创建工作日 17:50 自动化。只分析我本人当天发送的消息，非工作日静默跳过；先告诉我消息会在哪里处理，并等我同意后再启用；不要向飞书私聊发送任何结果。
 
-每个安装实例都执行 `unprovisioned → 创建当前用户 Base → 回读 owner/权限 → ready → 季度盘点回填`。只有 owner、通知接收人与当前登录用户一致时才启用自动化。配置中的 Base token、表 ID、接收人 ID 和飞书 profile 属于私密信息，禁止提交到 Git。年度工作日表应引用当地政府或其他权威来源；年份缺失时任务会关闭执行。
+每个安装实例都执行 `unprovisioned → 创建当前用户 Base → 回读 owner/权限 → ready → 季度盘点回填`。只有 owner、历史身份绑定字段与当前登录用户一致，且宿主能回贴到本对话时才启用自动化。配置中的 Base token、表 ID、身份字段和飞书 profile 属于私密信息，禁止提交到 Git。年度工作日表应引用当地政府或其他权威来源；年份缺失时任务会关闭执行。
 
 旧版配置不会因填有 Base token 就被自动视为可用。缺少显式状态、安装 ID 或 owner 时，doctor 会失败并要求按首次初始化或受控迁移处理；完整检查还会使用配置指定的 profile 实时读取 Base。
 

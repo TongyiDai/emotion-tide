@@ -51,6 +51,22 @@ class AnalysisContractTests(unittest.TestCase):
         self.assertIn("六维状态轮廓", contract)
         self.assertIn("雷达图", contract)
 
+    def test_daily_card_delivery_is_conversation_only(self) -> None:
+        contract = (ROOT / "skill" / "emotion-tide" / "SKILL.md").read_text(encoding="utf-8")
+        delivery = (ROOT / "skill" / "emotion-tide" / "references" / "conversation-delivery.md").read_text(encoding="utf-8")
+        self.assertIn("present_files", contract)
+        self.assertIn("不得通过 `lark-cli im`", contract)
+        self.assertIn("conversation_delivery_unavailable", delivery)
+        self.assertNotIn("先发送 PNG", contract)
+
+    def test_long_card_text_is_ellipsized_within_its_measured_width(self) -> None:
+        for width, size, max_lines in ((516, 25, 3), (1036, 16, 2)):
+            lines = renderer.wrap("长" * 1000, width, size, max_lines)
+            max_units = width / (size * 1.12)
+            self.assertEqual(len(lines), max_lines)
+            self.assertEqual(lines[-1][-1], "…")
+            self.assertTrue(all(renderer.display_units(line) <= max_units for line in lines))
+
     def test_weak_evidence_cannot_claim_precise_dimensions(self) -> None:
         payload = self.sample()
         payload.update({"message_count": 2, "effective_text_count": 2, "effective_char_count": 40})

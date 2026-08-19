@@ -11,7 +11,7 @@
 回填只能在满足以下全部条件后开始，任何一条不成立就不回填：
 
 1. `provisioning_state=ready`，且完整 `doctor.py --live` 通过；
-2. 当前实时用户身份 = Base owner = 通知接收人，三者一致；
+2. 当前实时用户身份 = Base owner = 配置中的历史身份绑定字段，三者一致；
 3. `text_processing_consent=true`（回填会把历史消息文本交给已同意的处理位置）；
 4. 覆盖回填窗口所有年份的可核验官方工作日日历都已配置（跨年时两年都要有）。
 
@@ -64,9 +64,9 @@ python3 scripts/backfill_plan.py \
 
 回填是补历史，不是当天回顾：
 
-- 默认 `backfill.render_per_day=false`、`notify_per_day=false`：逐日不发 PNG、不发暖心话、不发校准问题。历史某天证据不足属正常，按 schema 写入即可，不逐日通知。
-- `attention_flag=human_attention` 只在分析当天（今日）回顾里触发安全语言；回填历史日**不**对旧消息升级危机、不做风险分级、不追溯发送安全干预。历史命中只在最终汇报里以“检测到 N 天历史命中人工关注标记，未对历史消息采取危机干预”一句说明，供用户自行查看。
-- 无本人消息的工作日按 `无本人消息` 正常写入，保持趋势连续，不发通知。
+- 默认 `backfill.render_per_day=false`、`notify_per_day=false`：逐日不渲染 PNG、不在对话中给暖心话或校准问题。历史某天证据不足属正常，按 schema 写入即可，不逐日交付。
+- `attention_flag=human_attention` 只在分析当天（今日）回顾里触发安全语言；回填历史日**不**对旧消息升级危机、不做风险分级、不追溯对话或飞书安全干预。历史命中只在最终汇报里以“检测到 N 天历史命中人工关注标记，未对历史消息采取危机干预”一句说明，供用户自行查看。
+- 无本人消息的工作日按 `无本人消息` 正常写入，保持趋势连续，不进行对话交付。
 
 ### 4. 收尾
 
@@ -74,7 +74,7 @@ python3 scripts/backfill_plan.py \
 
 1. 更新 `backfill.state`（`in_progress` / `completed`）与 `last_completed_date`；
 2. 若 `remaining_after_limit>0`，说明还有更旧或后续批次未做，告知用户可再次运行继续；
-3. 回填完成后再进入常规每日流程，并按当天做一次正常的“当日回顾 + PNG + 校准问题”。
+3. 回填完成后再进入常规每日流程，并按当天做一次正常的“当日回顾 + 对话 PNG + 校准问题”。
 
 ## 汇报口径
 
